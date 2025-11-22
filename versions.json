@@ -1,0 +1,1972 @@
+{
+    "stable": {
+        "password_hashing": [
+            {
+                "name": "Argon2",
+                "family": "argon2",
+                "type": "memory-hard",
+                "status": "recommended",
+                "year": 2015,
+                "desc": "Winner of Password Hashing Competition, industry standard",
+                "variants": [
+                    {
+                        "name": "Argon2id",
+                        "desc": "Hybrid mode, recommended for password hashing",
+                        "use_cases": [
+                            "password storage",
+                            "key derivation"
+                        ]
+                    },
+                    {
+                        "name": "Argon2d",
+                        "desc": "Data-dependent, maximum GPU resistance",
+                        "use_cases": [
+                            "cryptocurrencies",
+                            "PoW systems"
+                        ]
+                    },
+                    {
+                        "name": "Argon2i",
+                        "desc": "Data-independent, side-channel resistant",
+                        "use_cases": [
+                            "secure password storage"
+                        ]
+                    }
+                ],
+                "implementations": [
+                    "libsodium",
+                    "Java",
+                    "Python",
+                    ".NET",
+                    "Node.js"
+                ]
+            },
+            {
+                "name": "scrypt",
+                "family": "scrypt",
+                "type": "memory-hard",
+                "status": "proven",
+                "year": 2009,
+                "desc": "Memory-hard KDF, widely deployed",
+                "use_cases": [
+                    "password storage",
+                    "Litecoin",
+                    "key derivation"
+                ],
+                "implementations": [
+                    "OpenSSL",
+                    "libsodium",
+                    "Python",
+                    "Node.js"
+                ]
+            },
+            {
+                "name": "bcrypt",
+                "family": "bcrypt",
+                "type": "adaptive",
+                "status": "proven",
+                "year": 1999,
+                "desc": "Blowfish-based, adaptive cost, battle-tested",
+                "use_cases": [
+                    "password storage",
+                    "web applications"
+                ],
+                "implementations": [
+                    "OpenBSD",
+                    "PHP",
+                    "Ruby",
+                    "Python",
+                    "Java"
+                ]
+            },
+            {
+                "name": "PBKDF2",
+                "family": "pbkdf",
+                "type": "iterative",
+                "status": "standard",
+                "year": 2000,
+                "desc": "PKCS #5 standard, HMAC-based",
+                "variants": [
+                    {
+                        "name": "PBKDF2-HMAC-SHA256",
+                        "desc": "SHA-256 based variant"
+                    },
+                    {
+                        "name": "PBKDF2-HMAC-SHA512",
+                        "desc": "SHA-512 based variant"
+                    },
+                    {
+                        "name": "PBKDF2-HMAC-SHA1",
+                        "desc": "Legacy SHA-1 variant"
+                    }
+                ],
+                "use_cases": [
+                    "WPA2",
+                    "password storage",
+                    "key derivation"
+                ],
+                "implementations": [
+                    "OpenSSL",
+                    "Java",
+                    ".NET",
+                    "Python",
+                    "widespread"
+                ]
+            }
+        ],
+        "cryptographic_hashing": [
+            {
+                "name": "SHA-2",
+                "family": "sha2",
+                "type": "hash",
+                "status": "standard",
+                "year": 2001,
+                "desc": "NIST standard, most widely deployed hash family",
+                "variants": [
+                    {
+                        "name": "SHA-224",
+                        "desc": "224-bit truncated variant"
+                    },
+                    {
+                        "name": "SHA-256",
+                        "desc": "256-bit, Bitcoin backbone",
+                        "use_cases": [
+                            "blockchain",
+                            "signatures",
+                            "certificates"
+                        ]
+                    },
+                    {
+                        "name": "SHA-384",
+                        "desc": "384-bit truncated SHA-512"
+                    },
+                    {
+                        "name": "SHA-512",
+                        "desc": "512-bit, fast on 64-bit systems",
+                        "use_cases": [
+                            "high security",
+                            "digital signatures"
+                        ]
+                    },
+                    {
+                        "name": "SHA-512/224",
+                        "desc": "224-bit truncated SHA-512"
+                    },
+                    {
+                        "name": "SHA-512/256",
+                        "desc": "256-bit truncated SHA-512"
+                    }
+                ],
+                "implementations": [
+                    "OpenSSL",
+                    "hardware acceleration",
+                    "ubiquitous"
+                ]
+            },
+            {
+                "name": "SHA-3",
+                "family": "sha3",
+                "type": "hash",
+                "status": "standard",
+                "year": 2015,
+                "desc": "Keccak-based NIST standard, different construction from SHA-2",
+                "variants": [
+                    {
+                        "name": "SHA3-224",
+                        "desc": "224-bit output"
+                    },
+                    {
+                        "name": "SHA3-256",
+                        "desc": "256-bit output, Ethereum-adjacent",
+                        "use_cases": [
+                            "future-proofing",
+                            "post-quantum prep"
+                        ]
+                    },
+                    {
+                        "name": "SHA3-384",
+                        "desc": "384-bit output"
+                    },
+                    {
+                        "name": "SHA3-512",
+                        "desc": "512-bit output, high security",
+                        "use_cases": [
+                            "long-term integrity"
+                        ]
+                    },
+                    {
+                        "name": "SHAKE128",
+                        "desc": "Extendable output function (XOF), variable length"
+                    },
+                    {
+                        "name": "SHAKE256",
+                        "desc": "Extendable output function, higher security"
+                    }
+                ],
+                "implementations": [
+                    "OpenSSL 1.1.1+",
+                    "Python",
+                    "Java 9+"
+                ]
+            },
+            {
+                "name": "BLAKE2",
+                "family": "blake2",
+                "type": "hash",
+                "status": "proven",
+                "year": 2012,
+                "desc": "Faster than SHA-2, SHA-3 finalist",
+                "variants": [
+                    {
+                        "name": "BLAKE2b",
+                        "desc": "Optimized for 64-bit platforms, up to 512-bit",
+                        "use_cases": [
+                            "Zcash",
+                            "general purpose",
+                            "high performance"
+                        ]
+                    },
+                    {
+                        "name": "BLAKE2s",
+                        "desc": "Optimized for 8-32 bit platforms, up to 256-bit",
+                        "use_cases": [
+                            "embedded",
+                            "mobile",
+                            "IoT"
+                        ]
+                    },
+                    {
+                        "name": "BLAKE2bp",
+                        "desc": "Parallel variant of BLAKE2b"
+                    },
+                    {
+                        "name": "BLAKE2sp",
+                        "desc": "Parallel variant of BLAKE2s"
+                    }
+                ],
+                "implementations": [
+                    "libsodium",
+                    "OpenSSH",
+                    "WireGuard"
+                ]
+            },
+            {
+                "name": "BLAKE3",
+                "family": "blake3",
+                "type": "hash",
+                "status": "modern",
+                "year": 2020,
+                "desc": "Extremely fast, parallelizable tree hashing",
+                "use_cases": [
+                    "file integrity",
+                    "checksums",
+                    "high throughput"
+                ],
+                "implementations": [
+                    "Rust",
+                    "C",
+                    "Python",
+                    "Go"
+                ]
+            },
+            {
+                "name": "Keccak",
+                "family": "keccak",
+                "type": "hash",
+                "status": "proven",
+                "year": 2012,
+                "desc": "Original SHA-3 competition winner",
+                "variants": [
+                    {
+                        "name": "Keccak-256",
+                        "desc": "Used in Ethereum, different from SHA3-256",
+                        "use_cases": [
+                            "Ethereum",
+                            "smart contracts"
+                        ]
+                    },
+                    {
+                        "name": "Keccak-512",
+                        "desc": "512-bit variant"
+                    }
+                ],
+                "implementations": [
+                    "Ethereum clients",
+                    "Web3 libraries"
+                ]
+            },
+            {
+                "name": "RIPEMD",
+                "family": "ripemd",
+                "type": "hash",
+                "status": "legacy-stable",
+                "year": 1996,
+                "desc": "RACE Integrity Primitives Evaluation",
+                "variants": [
+                    {
+                        "name": "RIPEMD-160",
+                        "desc": "160-bit, used in Bitcoin addresses",
+                        "use_cases": [
+                            "Bitcoin",
+                            "PGP"
+                        ]
+                    },
+                    {
+                        "name": "RIPEMD-128",
+                        "desc": "128-bit variant"
+                    },
+                    {
+                        "name": "RIPEMD-256",
+                        "desc": "256-bit variant"
+                    },
+                    {
+                        "name": "RIPEMD-320",
+                        "desc": "320-bit variant"
+                    }
+                ],
+                "implementations": [
+                    "OpenSSL",
+                    "Bitcoin Core"
+                ]
+            },
+            {
+                "name": "Whirlpool",
+                "family": "whirlpool",
+                "type": "hash",
+                "status": "proven",
+                "year": 2000,
+                "desc": "512-bit hash, ISO/IEC standard",
+                "use_cases": [
+                    "high security applications",
+                    "digital forensics"
+                ],
+                "implementations": [
+                    "OpenSSL",
+                    "VeraCrypt",
+                    "TrueCrypt"
+                ]
+            }
+        ],
+        "key_derivation": [
+            {
+                "name": "HKDF",
+                "family": "kdf",
+                "type": "extract-expand",
+                "status": "standard",
+                "year": 2010,
+                "desc": "HMAC-based KDF, RFC 5869",
+                "variants": [
+                    {
+                        "name": "HKDF-SHA256",
+                        "desc": "SHA-256 based"
+                    },
+                    {
+                        "name": "HKDF-SHA512",
+                        "desc": "SHA-512 based"
+                    }
+                ],
+                "use_cases": [
+                    "TLS 1.3",
+                    "Signal Protocol",
+                    "key derivation"
+                ],
+                "implementations": [
+                    "OpenSSL",
+                    "BoringSSL",
+                    "widespread"
+                ]
+            },
+            {
+                "name": "ANSI X9.63 KDF",
+                "family": "kdf",
+                "type": "hash-based",
+                "status": "standard",
+                "year": 2001,
+                "desc": "Elliptic curve key agreement standard",
+                "use_cases": [
+                    "ECIES",
+                    "ECDH",
+                    "financial systems"
+                ],
+                "implementations": [
+                    "OpenSSL",
+                    "BouncyCastle"
+                ]
+            },
+            {
+                "name": "Concat KDF",
+                "family": "kdf",
+                "type": "concatenation",
+                "status": "standard",
+                "year": 2001,
+                "desc": "NIST SP 800-56A standard KDF",
+                "use_cases": [
+                    "key agreement",
+                    "NIST compliance"
+                ],
+                "implementations": [
+                    "OpenSSL",
+                    "cryptographic libraries"
+                ]
+            }
+        ],
+        "proof_of_work": [
+            {
+                "name": "SHA-256d",
+                "family": "sha2",
+                "type": "double-hash",
+                "status": "production",
+                "year": 2008,
+                "desc": "Double SHA-256, Bitcoin PoW",
+                "use_cases": [
+                    "Bitcoin",
+                    "Bitcoin Cash",
+                    "BSV"
+                ],
+                "implementations": [
+                    "ASIC miners",
+                    "Bitcoin Core"
+                ]
+            },
+            {
+                "name": "Ethash",
+                "family": "dagger-hashimoto",
+                "type": "memory-hard",
+                "status": "legacy-production",
+                "year": 2015,
+                "desc": "Memory-hard DAG-based PoW",
+                "use_cases": [
+                    "Ethereum Classic",
+                    "pre-merge Ethereum"
+                ],
+                "implementations": [
+                    "GPU miners",
+                    "Ethereum clients"
+                ]
+            },
+            {
+                "name": "Equihash",
+                "family": "equihash",
+                "type": "memory-hard",
+                "status": "production",
+                "year": 2016,
+                "desc": "Generalized birthday problem, ASIC-resistant",
+                "variants": [
+                    {
+                        "name": "Equihash 200,9",
+                        "desc": "Zcash parameters"
+                    },
+                    {
+                        "name": "Equihash 144,5",
+                        "desc": "Bitcoin Gold parameters"
+                    },
+                    {
+                        "name": "Equihash 192,7",
+                        "desc": "Zero parameters"
+                    }
+                ],
+                "use_cases": [
+                    "Zcash",
+                    "Bitcoin Gold",
+                    "Horizen"
+                ],
+                "implementations": [
+                    "GPU miners",
+                    "ASIC miners"
+                ]
+            },
+            {
+                "name": "RandomX",
+                "family": "randomx",
+                "type": "cpu-optimized",
+                "status": "production",
+                "year": 2019,
+                "desc": "CPU-optimized random code execution",
+                "use_cases": [
+                    "Monero mining"
+                ],
+                "implementations": [
+                    "Monero",
+                    "CPU miners"
+                ]
+            },
+            {
+                "name": "X11",
+                "family": "multi-hash",
+                "type": "chained",
+                "status": "production",
+                "year": 2014,
+                "desc": "Chain of 11 hash algorithms",
+                "sub_algorithms": [
+                    "BLAKE",
+                    "BMW",
+                    "Grøstl",
+                    "JH",
+                    "Keccak",
+                    "Skein",
+                    "Luffa",
+                    "CubeHash",
+                    "SHAvite-3",
+                    "SIMD",
+                    "ECHO"
+                ],
+                "use_cases": [
+                    "Dash mining"
+                ],
+                "implementations": [
+                    "ASIC miners",
+                    "Dash"
+                ]
+            },
+            {
+                "name": "X13",
+                "family": "multi-hash",
+                "type": "chained",
+                "status": "production",
+                "year": 2014,
+                "desc": "Extended X11 with 13 algorithms",
+                "sub_algorithms": [
+                    "X11 algorithms + Fugue",
+                    "Hamsi"
+                ],
+                "use_cases": [
+                    "various altcoins"
+                ],
+                "implementations": [
+                    "GPU/ASIC miners"
+                ]
+            },
+            {
+                "name": "X16R",
+                "family": "multi-hash",
+                "type": "randomized-chain",
+                "status": "production",
+                "year": 2018,
+                "desc": "16 algorithms in randomized order",
+                "sub_algorithms": [
+                    "BLAKE",
+                    "BMW",
+                    "Grøstl",
+                    "JH",
+                    "Keccak",
+                    "Skein",
+                    "Luffa",
+                    "CubeHash",
+                    "SHAvite",
+                    "SIMD",
+                    "ECHO",
+                    "Hamsi",
+                    "Fugue",
+                    "Shabal",
+                    "Whirlpool",
+                    "SHA512"
+                ],
+                "use_cases": [
+                    "Ravencoin"
+                ],
+                "implementations": [
+                    "GPU miners"
+                ]
+            },
+            {
+                "name": "Lyra2REv2",
+                "family": "lyra2",
+                "type": "multi-algorithm",
+                "status": "production",
+                "year": 2016,
+                "desc": "Multiple algorithm chain",
+                "sub_algorithms": [
+                    "BLAKE",
+                    "Keccak",
+                    "CubeHash",
+                    "Lyra2",
+                    "Skein",
+                    "BMW"
+                ],
+                "use_cases": [
+                    "Vertcoin",
+                    "Monacoin"
+                ],
+                "implementations": [
+                    "GPU miners"
+                ]
+            },
+            {
+                "name": "Lyra2Z",
+                "family": "lyra2",
+                "type": "memory-hard",
+                "status": "production",
+                "year": 2018,
+                "desc": "Simplified Lyra2 variant",
+                "sub_algorithms": [
+                    "Lyra2",
+                    "single-pass"
+                ],
+                "use_cases": [
+                    "Zcoin (now Firo)"
+                ],
+                "implementations": [
+                    "GPU miners"
+                ]
+            },
+            {
+                "name": "ProgPoW",
+                "family": "progpow",
+                "type": "gpu-optimized",
+                "status": "production",
+                "year": 2018,
+                "desc": "Programmatic PoW, GPU-optimized",
+                "use_cases": [
+                    "Ethereum Classic variants",
+                    "test networks"
+                ],
+                "implementations": [
+                    "GPU miners"
+                ]
+            }
+        ],
+        "message_authentication": [
+            {
+                "name": "HMAC",
+                "family": "hmac",
+                "type": "mac",
+                "status": "standard",
+                "year": 1996,
+                "desc": "Hash-based MAC, RFC 2104",
+                "variants": [
+                    {
+                        "name": "HMAC-MD5",
+                        "desc": "MD5 based (legacy)"
+                    },
+                    {
+                        "name": "HMAC-SHA1",
+                        "desc": "SHA-1 based (transitioning)"
+                    },
+                    {
+                        "name": "HMAC-SHA256",
+                        "desc": "SHA-256 based (recommended)",
+                        "use_cases": [
+                            "API auth",
+                            "JWT",
+                            "message integrity"
+                        ]
+                    },
+                    {
+                        "name": "HMAC-SHA512",
+                        "desc": "SHA-512 based (high security)"
+                    },
+                    {
+                        "name": "HMAC-SHA3-256",
+                        "desc": "SHA3-256 based"
+                    }
+                ],
+                "implementations": [
+                    "OpenSSL",
+                    "ubiquitous"
+                ]
+            },
+            {
+                "name": "Poly1305",
+                "family": "poly1305",
+                "type": "mac",
+                "status": "standard",
+                "year": 2005,
+                "desc": "Fast one-time MAC",
+                "use_cases": [
+                    "TLS",
+                    "SSH",
+                    "WireGuard"
+                ],
+                "implementations": [
+                    "libsodium",
+                    "OpenSSL",
+                    "BoringSSL"
+                ]
+            },
+            {
+                "name": "BLAKE2-MAC",
+                "family": "blake2",
+                "type": "mac",
+                "status": "proven",
+                "year": 2012,
+                "desc": "Keyed BLAKE2 as MAC",
+                "use_cases": [
+                    "high performance MAC"
+                ],
+                "implementations": [
+                    "libsodium"
+                ]
+            },
+            {
+                "name": "KMAC",
+                "family": "sha3",
+                "type": "mac",
+                "status": "standard",
+                "year": 2016,
+                "desc": "Keccak-based MAC, NIST SP 800-185",
+                "variants": [
+                    {
+                        "name": "KMAC128",
+                        "desc": "128-bit security"
+                    },
+                    {
+                        "name": "KMAC256",
+                        "desc": "256-bit security"
+                    }
+                ],
+                "implementations": [
+                    "OpenSSL 3.0+"
+                ]
+            },
+            {
+                "name": "GMAC",
+                "family": "gcm",
+                "type": "mac",
+                "status": "standard",
+                "year": 2007,
+                "desc": "GCM authentication without encryption",
+                "use_cases": [
+                    "authentication-only mode"
+                ],
+                "implementations": [
+                    "OpenSSL"
+                ]
+            }
+        ],
+        "authenticated_encryption": [
+            {
+                "name": "ChaCha20-Poly1305",
+                "family": "chacha",
+                "type": "aead",
+                "status": "standard",
+                "year": 2014,
+                "desc": "RFC 8439, software-optimized AEAD",
+                "variants": [
+                    {
+                        "name": "ChaCha20-Poly1305",
+                        "desc": "Standard 96-bit nonce"
+                    },
+                    {
+                        "name": "XChaCha20-Poly1305",
+                        "desc": "Extended 192-bit nonce"
+                    }
+                ],
+                "use_cases": [
+                    "TLS",
+                    "WireGuard",
+                    "Signal",
+                    "mobile"
+                ],
+                "implementations": [
+                    "OpenSSL",
+                    "libsodium",
+                    "BoringSSL"
+                ]
+            },
+            {
+                "name": "AES-GCM",
+                "family": "aes",
+                "type": "aead",
+                "status": "standard",
+                "year": 2007,
+                "desc": "Hardware-accelerated AEAD",
+                "variants": [
+                    {
+                        "name": "AES-128-GCM",
+                        "desc": "128-bit key"
+                    },
+                    {
+                        "name": "AES-192-GCM",
+                        "desc": "192-bit key"
+                    },
+                    {
+                        "name": "AES-256-GCM",
+                        "desc": "256-bit key"
+                    }
+                ],
+                "use_cases": [
+                    "TLS",
+                    "IPsec",
+                    "disk encryption"
+                ],
+                "implementations": [
+                    "OpenSSL",
+                    "hardware AES-NI"
+                ]
+            },
+            {
+                "name": "AES-CCM",
+                "family": "aes",
+                "type": "aead",
+                "status": "standard",
+                "year": 2003,
+                "desc": "Counter with CBC-MAC",
+                "use_cases": [
+                    "802.11i",
+                    "Bluetooth",
+                    "IoT"
+                ],
+                "implementations": [
+                    "OpenSSL",
+                    "embedded systems"
+                ]
+            },
+            {
+                "name": "AES-OCB",
+                "family": "aes",
+                "type": "aead",
+                "status": "proven",
+                "year": 2001,
+                "desc": "Offset Codebook Mode, patent-free since 2021",
+                "variants": [
+                    {
+                        "name": "OCB1",
+                        "desc": "Original version"
+                    },
+                    {
+                        "name": "OCB2",
+                        "desc": "Improved version"
+                    },
+                    {
+                        "name": "OCB3",
+                        "desc": "RFC 7253, current standard"
+                    }
+                ],
+                "use_cases": [
+                    "high-performance AEAD"
+                ],
+                "implementations": [
+                    "OpenSSL 3.0+",
+                    "specialized libraries"
+                ]
+            },
+            {
+                "name": "AES-EAX",
+                "family": "aes",
+                "type": "aead",
+                "status": "proven",
+                "year": 2003,
+                "desc": "Two-pass AEAD scheme",
+                "use_cases": [
+                    "alternative to GCM"
+                ],
+                "implementations": [
+                    "cryptographic libraries"
+                ]
+            }
+        ],
+        "specialized_algorithms": [
+            {
+                "name": "SipHash",
+                "family": "siphash",
+                "type": "prf",
+                "status": "proven",
+                "year": 2012,
+                "desc": "Fast short-input PRF",
+                "variants": [
+                    {
+                        "name": "SipHash-2-4",
+                        "desc": "Standard parameters (2 compression, 4 finalization)"
+                    },
+                    {
+                        "name": "SipHash-1-3",
+                        "desc": "Faster variant"
+                    }
+                ],
+                "use_cases": [
+                    "hash tables",
+                    "DoS prevention"
+                ],
+                "implementations": [
+                    "Linux kernel",
+                    "Rust",
+                    "Python"
+                ]
+            },
+            {
+                "name": "CubeHash",
+                "family": "cubehash",
+                "type": "hash",
+                "status": "proven",
+                "year": 2008,
+                "desc": "SHA-3 candidate, simple design",
+                "use_cases": [
+                    "component in multi-hash PoW"
+                ],
+                "implementations": [
+                    "mining software"
+                ]
+            },
+            {
+                "name": "Grøstl",
+                "family": "groestl",
+                "type": "hash",
+                "status": "proven",
+                "year": 2008,
+                "desc": "SHA-3 finalist, AES-based",
+                "variants": [
+                    {
+                        "name": "Grøstl-256",
+                        "desc": "256-bit output"
+                    },
+                    {
+                        "name": "Grøstl-512",
+                        "desc": "512-bit output"
+                    }
+                ],
+                "use_cases": [
+                    "Groestlcoin"
+                ],
+                "implementations": [
+                    "Groestlcoin miners"
+                ]
+            },
+            {
+                "name": "Skein",
+                "family": "skein",
+                "type": "hash",
+                "status": "proven",
+                "year": 2008,
+                "desc": "SHA-3 finalist, Threefish-based",
+                "variants": [
+                    {
+                        "name": "Skein-256",
+                        "desc": "256-bit output"
+                    },
+                    {
+                        "name": "Skein-512",
+                        "desc": "512-bit output"
+                    },
+                    {
+                        "name": "Skein-1024",
+                        "desc": "1024-bit output"
+                    }
+                ],
+                "use_cases": [
+                    "component in multi-hash chains"
+                ],
+                "implementations": [
+                    "mining software",
+                    "cryptographic libraries"
+                ]
+            },
+            {
+                "name": "JH",
+                "family": "jh",
+                "type": "hash",
+                "status": "proven",
+                "year": 2008,
+                "desc": "SHA-3 finalist, bit-slice design",
+                "use_cases": [
+                    "academic research",
+                    "multi-hash PoW"
+                ],
+                "implementations": [
+                    "reference implementations"
+                ]
+            }
+        ]
+    },
+    "under_evaluation": {
+        "post_quantum_cryptography": [
+            {
+                "name": "CRYSTALS-Kyber",
+                "family": "lattice",
+                "type": "kem",
+                "status": "nist-selected",
+                "year": 2020,
+                "desc": "Lattice-based key encapsulation, NIST PQC winner",
+                "variants": [
+                    {
+                        "name": "Kyber512",
+                        "desc": "Security level 1"
+                    },
+                    {
+                        "name": "Kyber768",
+                        "desc": "Security level 3 (recommended)"
+                    },
+                    {
+                        "name": "Kyber1024",
+                        "desc": "Security level 5"
+                    }
+                ],
+                "use_cases": [
+                    "post-quantum TLS",
+                    "future-proof encryption"
+                ],
+                "implementations": [
+                    "liboqs",
+                    "experimental TLS"
+                ]
+            },
+            {
+                "name": "CRYSTALS-Dilithium",
+                "family": "lattice",
+                "type": "signature",
+                "status": "nist-selected",
+                "year": 2020,
+                "desc": "Lattice-based signatures, NIST PQC winner",
+                "variants": [
+                    {
+                        "name": "Dilithium2",
+                        "desc": "Security level 2"
+                    },
+                    {
+                        "name": "Dilithium3",
+                        "desc": "Security level 3 (recommended)"
+                    },
+                    {
+                        "name": "Dilithium5",
+                        "desc": "Security level 5"
+                    }
+                ],
+                "use_cases": [
+                    "post-quantum signatures",
+                    "certificates"
+                ],
+                "implementations": [
+                    "liboqs",
+                    "experimental"
+                ]
+            },
+            {
+                "name": "SPHINCS+",
+                "family": "sphincs",
+                "type": "signature",
+                "status": "nist-selected",
+                "year": 2020,
+                "desc": "Stateless hash-based signatures",
+                "variants": [
+                    {
+                        "name": "SPHINCS+-128s",
+                        "desc": "128-bit security, small signatures"
+                    },
+                    {
+                        "name": "SPHINCS+-128f",
+                        "desc": "128-bit security, fast"
+                    },
+                    {
+                        "name": "SPHINCS+-192s",
+                        "desc": "192-bit security, small"
+                    },
+                    {
+                        "name": "SPHINCS+-192f",
+                        "desc": "192-bit security, fast"
+                    },
+                    {
+                        "name": "SPHINCS+-256s",
+                        "desc": "256-bit security, small"
+                    },
+                    {
+                        "name": "SPHINCS+-256f",
+                        "desc": "256-bit security, fast"
+                    }
+                ],
+                "use_cases": [
+                    "conservative post-quantum option"
+                ],
+                "implementations": [
+                    "liboqs",
+                    "reference"
+                ]
+            },
+            {
+                "name": "FALCON",
+                "family": "lattice",
+                "type": "signature",
+                "status": "nist-selected",
+                "year": 2020,
+                "desc": "Compact lattice-based signatures",
+                "variants": [
+                    {
+                        "name": "FALCON-512",
+                        "desc": "NIST level 1"
+                    },
+                    {
+                        "name": "FALCON-1024",
+                        "desc": "NIST level 5"
+                    }
+                ],
+                "use_cases": [
+                    "compact post-quantum signatures"
+                ],
+                "implementations": [
+                    "liboqs",
+                    "experimental"
+                ]
+            },
+            {
+                "name": "BIKE",
+                "family": "code-based",
+                "type": "kem",
+                "status": "nist-round4",
+                "year": 2017,
+                "desc": "Code-based KEM, Round 4 alternate",
+                "use_cases": [
+                    "alternative post-quantum KEM"
+                ],
+                "implementations": [
+                    "liboqs"
+                ]
+            },
+            {
+                "name": "Classic McEliece",
+                "family": "code-based",
+                "type": "kem",
+                "status": "nist-round4",
+                "year": 2017,
+                "desc": "Conservative code-based cryptography",
+                "variants": [
+                    {
+                        "name": "mceliece348864",
+                        "desc": "Smallest parameter set"
+                    },
+                    {
+                        "name": "mceliece460896",
+                        "desc": "Medium security"
+                    },
+                    {
+                        "name": "mceliece6688128",
+                        "desc": "High security"
+                    },
+                    {
+                        "name": "mceliece8192128",
+                        "desc": "Highest security"
+                    }
+                ],
+                "use_cases": [
+                    "ultra-conservative post-quantum"
+                ],
+                "implementations": [
+                    "liboqs"
+                ]
+            },
+            {
+                "name": "HQC",
+                "family": "code-based",
+                "type": "kem",
+                "status": "nist-round4",
+                "year": 2017,
+                "desc": "Hamming Quasi-Cyclic KEM",
+                "use_cases": [
+                    "alternative post-quantum KEM"
+                ],
+                "implementations": [
+                    "liboqs"
+                ]
+            }
+        ],
+        "experimental_hashing": [
+            {
+                "name": "Kangaroo Twelve",
+                "family": "keccak",
+                "type": "hash",
+                "status": "experimental",
+                "year": 2016,
+                "desc": "Fast variant of Keccak with reduced rounds",
+                "use_cases": [
+                    "high-performance hashing"
+                ],
+                "implementations": [
+                    "experimental libraries"
+                ]
+            },
+            {
+                "name": "Ascon",
+                "family": "ascon",
+                "type": "aead-hash",
+                "status": "lwc-winner",
+                "year": 2021,
+                "desc": "Lightweight crypto winner, AEAD and hash",
+                "variants": [
+                    {
+                        "name": "Ascon-128",
+                        "desc": "128-bit AEAD"
+                    },
+                    {
+                        "name": "Ascon-128a",
+                        "desc": "Faster AEAD variant"
+                    },
+                    {
+                        "name": "Ascon-Hash",
+                        "desc": "Hash function variant"
+                    },
+                    {
+                        "name": "Ascon-Hasha",
+                        "desc": "Faster hash variant"
+                    }
+                ],
+                "use_cases": [
+                    "IoT",
+                    "embedded systems",
+                    "lightweight crypto"
+                ],
+                "implementations": [
+                    "reference C",
+                    "experimental"
+                ]
+            },
+            {
+                "name": "PHOTON",
+                "family": "photon",
+                "type": "lightweight-hash",
+                "status": "research",
+                "year": 2011,
+                "desc": "Lightweight hash for constrained devices",
+                "use_cases": [
+                    "RFID",
+                    "ultra-lightweight crypto"
+                ],
+                "implementations": [
+                    "reference implementations"
+                ]
+            },
+            {
+                "name": "SPONGENT",
+                "family": "sponge",
+                "type": "lightweight-hash",
+                "status": "research",
+                "year": 2011,
+                "desc": "Lightweight sponge construction",
+                "variants": [
+                    {
+                        "name": "SPONGENT-88",
+                        "desc": "88-bit output"
+                    },
+                    {
+                        "name": "SPONGENT-128",
+                        "desc": "128-bit output"
+                    },
+                    {
+                        "name": "SPONGENT-160",
+                        "desc": "160-bit output"
+                    },
+                    {
+                        "name": "SPONGENT-224",
+                        "desc": "224-bit output"
+                    },
+                    {
+                        "name": "SPONGENT-256",
+                        "desc": "256-bit output"
+                    }
+                ],
+                "use_cases": [
+                    "hardware implementations",
+                    "lightweight"
+                ],
+                "implementations": [
+                    "academic prototypes"
+                ]
+            }
+        ],
+        "experimental_password_hashing": [
+            {
+                "name": "Balloon Hashing",
+                "family": "balloon",
+                "type": "memory-hard",
+                "status": "research",
+                "year": 2016,
+                "desc": "Provably memory-hard with sequential access",
+                "variants": [
+                    {
+                        "name": "Balloon-SHA256",
+                        "desc": "SHA-256 based"
+                    },
+                    {
+                        "name": "Balloon-BLAKE2b",
+                        "desc": "BLAKE2b based"
+                    }
+                ],
+                "use_cases": [
+                    "research",
+                    "provable security"
+                ],
+                "implementations": [
+                    "reference implementations"
+                ]
+            },
+            {
+                "name": "Catena",
+                "family": "catena",
+                "type": "memory-hard",
+                "status": "research",
+                "year": 2014,
+                "desc": "PHC finalist, graph-based memory-hard",
+                "variants": [
+                    {
+                        "name": "Catena-Dragonfly",
+                        "desc": "Bit-reversal graph"
+                    },
+                    {
+                        "name": "Catena-Butterfly",
+                        "desc": "Butterfly graph"
+                    }
+                ],
+                "use_cases": [
+                    "academic research"
+                ],
+                "implementations": [
+                    "PHC submission code"
+                ]
+            },
+            {
+                "name": "Makwa",
+                "family": "makwa",
+                "type": "modular-squaring",
+                "status": "research",
+                "year": 2014,
+                "desc": "PHC finalist, delegation-friendly",
+                "use_cases": [
+                    "delegated password verification"
+                ],
+                "implementations": [
+                    "PHC submission code"
+                ]
+            },
+            {
+                "name": "yescrypt",
+                "family": "scrypt-derivative",
+                "type": "memory-hard",
+                "status": "research",
+                "year": 2014,
+                "desc": "PHC finalist, improved scrypt",
+                "use_cases": [
+                    "specialized password hashing"
+                ],
+                "implementations": [
+                    "PHC submission code",
+                    "some altcoins"
+                ]
+            },
+            {
+                "name": "Lyra2",
+                "family": "lyra",
+                "type": "memory-hard",
+                "status": "research-production",
+                "year": 2014,
+                "desc": "PHC finalist, flexible sponge-based",
+                "use_cases": [
+                    "password hashing",
+                    "PoW (in variants)"
+                ],
+                "implementations": [
+                    "reference code",
+                    "cryptocurrency miners"
+                ]
+            }
+        ],
+        "experimental_proof_of_work": [
+            {
+                "name": "RandomHash",
+                "family": "randomhash",
+                "type": "dynamic",
+                "status": "experimental",
+                "year": 2018,
+                "desc": "Dynamic algorithm selection based on block hash",
+                "use_cases": [
+                    "PascalCoin"
+                ],
+                "implementations": [
+                    "PascalCoin"
+                ]
+            },
+            {
+                "name": "Cuckoo Cycle",
+                "family": "cuckoo",
+                "type": "graph-theoretic",
+                "status": "production",
+                "year": 2015,
+                "desc": "Graph-theoretic PoW, memory-latency bound",
+                "variants": [
+                    {
+                        "name": "Cuckaroo",
+                        "desc": "ASIC-resistant variant"
+                    },
+                    {
+                        "name": "Cuckatoo",
+                        "desc": "ASIC-friendly variant"
+                    },
+                    {
+                        "name": "Cuckaroom",
+                        "desc": "Size-optimized variant"
+                    }
+                ],
+                "use_cases": [
+                    "Grin",
+                    "MimbleWimble coins"
+                ],
+                "implementations": [
+                    "Grin miners"
+                ]
+            },
+            {
+                "name": "ProgPoWZ",
+                "family": "progpow",
+                "type": "gpu-optimized",
+                "status": "experimental",
+                "year": 2019,
+                "desc": "Modified ProgPoW variant",
+                "use_cases": [
+                    "experimental chains"
+                ],
+                "implementations": [
+                    "test implementations"
+                ]
+            },
+            {
+                "name": "FiroPow",
+                "family": "progpow",
+                "type": "gpu-optimized",
+                "status": "production",
+                "year": 2021,
+                "desc": "ProgPoW variant for Firo",
+                "use_cases": [
+                    "Firo (formerly Zcoin)"
+                ],
+                "implementations": [
+                    "Firo miners"
+                ]
+            },
+            {
+                "name": "KawPow",
+                "family": "progpow",
+                "type": "gpu-optimized",
+                "status": "production",
+                "year": 2020,
+                "desc": "ProgPoW variant for Ravencoin",
+                "use_cases": [
+                    "Ravencoin"
+                ],
+                "implementations": [
+                    "Ravencoin miners"
+                ]
+            },
+            {
+                "name": "Etchash",
+                "family": "ethash",
+                "type": "memory-hard",
+                "status": "production",
+                "year": 2020,
+                "desc": "Modified Ethash with smaller DAG",
+                "use_cases": [
+                    "Ethereum Classic"
+                ],
+                "implementations": [
+                    "ETC miners"
+                ]
+            },
+            {
+                "name": "Autolykos",
+                "family": "autolykos",
+                "type": "memory-hard",
+                "status": "production",
+                "year": 2019,
+                "desc": "Memory-hard ASIC-resistant PoW",
+                "variants": [
+                    {
+                        "name": "Autolykos v1",
+                        "desc": "Original version"
+                    },
+                    {
+                        "name": "Autolykos v2",
+                        "desc": "Pool-mining friendly"
+                    }
+                ],
+                "use_cases": [
+                    "Ergo blockchain"
+                ],
+                "implementations": [
+                    "Ergo miners"
+                ]
+            },
+            {
+                "name": "Verthash",
+                "family": "verthash",
+                "type": "one-click-mineable",
+                "status": "production",
+                "year": 2020,
+                "desc": "Designed for consumer hardware mining",
+                "use_cases": [
+                    "Vertcoin"
+                ],
+                "implementations": [
+                    "Vertcoin miners"
+                ]
+            },
+            {
+                "name": "AstroBWT",
+                "family": "astrobwt",
+                "type": "cpu-optimized",
+                "status": "production",
+                "year": 2020,
+                "desc": "CPU-friendly Burrows-Wheeler Transform based",
+                "use_cases": [
+                    "Dero"
+                ],
+                "implementations": [
+                    "Dero miners"
+                ]
+            }
+        ],
+        "experimental_authenticated_encryption": [
+            {
+                "name": "AEGIS",
+                "family": "aegis",
+                "type": "aead",
+                "status": "experimental",
+                "year": 2016,
+                "desc": "AES-based AEAD, extremely fast with AES-NI",
+                "variants": [
+                    {
+                        "name": "AEGIS-128",
+                        "desc": "128-bit key"
+                    },
+                    {
+                        "name": "AEGIS-128L",
+                        "desc": "128-bit key, longer state"
+                    },
+                    {
+                        "name": "AEGIS-256",
+                        "desc": "256-bit key"
+                    }
+                ],
+                "use_cases": [
+                    "high-performance AEAD"
+                ],
+                "implementations": [
+                    "experimental libraries",
+                    "Zig crypto"
+                ]
+            },
+            {
+                "name": "Deoxys-II",
+                "family": "deoxys",
+                "type": "aead",
+                "status": "caesar-finalist",
+                "year": 2016,
+                "desc": "CAESAR competition finalist, tweakable",
+                "use_cases": [
+                    "authenticated encryption"
+                ],
+                "implementations": [
+                    "CAESAR submissions"
+                ]
+            },
+            {
+                "name": "COLM",
+                "family": "colm",
+                "type": "aead",
+                "status": "caesar-finalist",
+                "year": 2016,
+                "desc": "CAESAR finalist, AES-based",
+                "use_cases": [
+                    "research"
+                ],
+                "implementations": [
+                    "CAESAR submissions"
+                ]
+            },
+            {
+                "name": "Rocca",
+                "family": "rocca",
+                "type": "aead",
+                "status": "experimental",
+                "year": 2022,
+                "desc": "High-speed AEAD cipher",
+                "use_cases": [
+                    "high-throughput encryption"
+                ],
+                "implementations": [
+                    "research prototypes"
+                ]
+            }
+        ],
+        "experimental_stream_ciphers": [
+            {
+                "name": "Grain",
+                "family": "grain",
+                "type": "stream",
+                "status": "estream-winner",
+                "year": 2006,
+                "desc": "eSTREAM portfolio cipher for hardware",
+                "variants": [
+                    {
+                        "name": "Grain-128",
+                        "desc": "128-bit security"
+                    },
+                    {
+                        "name": "Grain-128a",
+                        "desc": "Authenticated variant"
+                    },
+                    {
+                        "name": "Grain-128AEAD",
+                        "desc": "AEAD variant"
+                    }
+                ],
+                "use_cases": [
+                    "hardware implementation",
+                    "IoT"
+                ],
+                "implementations": [
+                    "reference code"
+                ]
+            },
+            {
+                "name": "Trivium",
+                "family": "trivium",
+                "type": "stream",
+                "status": "estream-winner",
+                "year": 2006,
+                "desc": "eSTREAM portfolio, extremely simple design",
+                "use_cases": [
+                    "hardware implementation"
+                ],
+                "implementations": [
+                    "reference code",
+                    "hardware"
+                ]
+            },
+            {
+                "name": "Mickey",
+                "family": "mickey",
+                "type": "stream",
+                "status": "estream-winner",
+                "year": 2006,
+                "desc": "eSTREAM portfolio for hardware",
+                "variants": [
+                    {
+                        "name": "MICKEY-128",
+                        "desc": "128-bit variant"
+                    },
+                    {
+                        "name": "MICKEY-v2",
+                        "desc": "Improved version"
+                    }
+                ],
+                "use_cases": [
+                    "constrained hardware"
+                ],
+                "implementations": [
+                    "reference code"
+                ]
+            },
+            {
+                "name": "Rabbit",
+                "family": "rabbit",
+                "type": "stream",
+                "status": "estream-winner",
+                "year": 2003,
+                "desc": "eSTREAM portfolio, software-optimized",
+                "use_cases": [
+                    "high-speed software encryption"
+                ],
+                "implementations": [
+                    "reference code",
+                    "OpenSSL"
+                ]
+            },
+            {
+                "name": "HC-128",
+                "family": "hc",
+                "type": "stream",
+                "status": "estream-winner",
+                "year": 2006,
+                "desc": "eSTREAM portfolio for software",
+                "use_cases": [
+                    "high-speed streaming"
+                ],
+                "implementations": [
+                    "reference code"
+                ]
+            },
+            {
+                "name": "Salsa20",
+                "family": "salsa",
+                "type": "stream",
+                "status": "estream-winner",
+                "year": 2005,
+                "desc": "eSTREAM winner, ChaCha20 predecessor",
+                "variants": [
+                    {
+                        "name": "Salsa20/20",
+                        "desc": "Full 20 rounds"
+                    },
+                    {
+                        "name": "Salsa20/12",
+                        "desc": "12 rounds variant"
+                    },
+                    {
+                        "name": "Salsa20/8",
+                        "desc": "8 rounds variant"
+                    }
+                ],
+                "use_cases": [
+                    "legacy systems",
+                    "academic"
+                ],
+                "implementations": [
+                    "NaCl",
+                    "libsodium legacy"
+                ]
+            }
+        ],
+        "specialized_experimental": [
+            {
+                "name": "Gimli",
+                "family": "gimli",
+                "type": "permutation",
+                "status": "experimental",
+                "year": 2017,
+                "desc": "Lightweight permutation for multiple uses",
+                "use_cases": [
+                    "AEAD",
+                    "hash",
+                    "flexible primitive"
+                ],
+                "implementations": [
+                    "research code"
+                ]
+            },
+            {
+                "name": "Xoodoo",
+                "family": "xoodoo",
+                "type": "permutation",
+                "status": "experimental",
+                "year": 2018,
+                "desc": "Lightweight permutation, Keccak-like",
+                "variants": [
+                    {
+                        "name": "Xoodyak",
+                        "desc": "AEAD and hash mode"
+                    }
+                ],
+                "use_cases": [
+                    "lightweight crypto",
+                    "IoT"
+                ],
+                "implementations": [
+                    "research code"
+                ]
+            },
+            {
+                "name": "NORX",
+                "family": "norx",
+                "type": "aead",
+                "status": "caesar-candidate",
+                "year": 2014,
+                "desc": "CAESAR competition entry",
+                "use_cases": [
+                    "experimental AEAD"
+                ],
+                "implementations": [
+                    "CAESAR submissions"
+                ]
+            },
+            {
+                "name": "Keyak",
+                "family": "keccak",
+                "type": "aead",
+                "status": "caesar-candidate",
+                "year": 2014,
+                "desc": "Keccak-based AEAD",
+                "variants": [
+                    {
+                        "name": "Lake Keyak",
+                        "desc": "Compact variant"
+                    },
+                    {
+                        "name": "River Keyak",
+                        "desc": "Medium variant"
+                    },
+                    {
+                        "name": "Sea Keyak",
+                        "desc": "High-performance variant"
+                    },
+                    {
+                        "name": "Ocean Keyak",
+                        "desc": "Parallel variant"
+                    }
+                ],
+                "use_cases": [
+                    "research"
+                ],
+                "implementations": [
+                    "CAESAR submissions"
+                ]
+            },
+            {
+                "name": "ACORN",
+                "family": "acorn",
+                "type": "aead",
+                "status": "caesar-candidate",
+                "year": 2014,
+                "desc": "Lightweight AEAD for IoT",
+                "use_cases": [
+                    "constrained devices"
+                ],
+                "implementations": [
+                    "CAESAR submissions"
+                ]
+            }
+        ],
+        "quantum_resistant_experimental": [
+            {
+                "name": "NTRU",
+                "family": "lattice",
+                "type": "encryption",
+                "status": "standardization",
+                "year": 1996,
+                "desc": "Lattice-based encryption, long history",
+                "variants": [
+                    {
+                        "name": "NTRU-HPS",
+                        "desc": "High performance standard"
+                    },
+                    {
+                        "name": "NTRU-HRSS",
+                        "desc": "Hybrid random/standard"
+                    }
+                ],
+                "use_cases": [
+                    "post-quantum encryption"
+                ],
+                "implementations": [
+                    "liboqs",
+                    "commercial products"
+                ]
+            },
+            {
+                "name": "SABER",
+                "family": "lattice",
+                "type": "kem",
+                "status": "nist-finalist",
+                "year": 2017,
+                "desc": "Module-LWR based KEM",
+                "variants": [
+                    {
+                        "name": "LightSaber",
+                        "desc": "Level 1 security"
+                    },
+                    {
+                        "name": "Saber",
+                        "desc": "Level 3 security"
+                    },
+                    {
+                        "name": "FireSaber",
+                        "desc": "Level 5 security"
+                    }
+                ],
+                "use_cases": [
+                    "post-quantum key exchange"
+                ],
+                "implementations": [
+                    "liboqs"
+                ]
+            },
+            {
+                "name": "FrodoKEM",
+                "family": "lattice",
+                "type": "kem",
+                "status": "nist-alternate",
+                "year": 2017,
+                "desc": "Conservative Learning with Errors based",
+                "variants": [
+                    {
+                        "name": "FrodoKEM-640",
+                        "desc": "AES variant"
+                    },
+                    {
+                        "name": "FrodoKEM-976",
+                        "desc": "Medium security"
+                    },
+                    {
+                        "name": "FrodoKEM-1344",
+                        "desc": "High security"
+                    }
+                ],
+                "use_cases": [
+                    "conservative post-quantum"
+                ],
+                "implementations": [
+                    "liboqs"
+                ]
+            },
+            {
+                "name": "XMSS",
+                "family": "hash-based",
+                "type": "signature",
+                "status": "rfc-8391",
+                "year": 2018,
+                "desc": "Stateful hash-based signatures",
+                "variants": [
+                    {
+                        "name": "XMSS",
+                        "desc": "Single-tree variant"
+                    },
+                    {
+                        "name": "XMSS^MT",
+                        "desc": "Multi-tree variant"
+                    }
+                ],
+                "use_cases": [
+                    "firmware signing",
+                    "long-term signatures"
+                ],
+                "implementations": [
+                    "RFC implementations"
+                ]
+            },
+            {
+                "name": "LMS",
+                "family": "hash-based",
+                "type": "signature",
+                "status": "rfc-8554",
+                "year": 2019,
+                "desc": "Leighton-Micali hash-based signatures",
+                "variants": [
+                    {
+                        "name": "LMS",
+                        "desc": "Base scheme"
+                    },
+                    {
+                        "name": "HSS",
+                        "desc": "Hierarchical variant"
+                    }
+                ],
+                "use_cases": [
+                    "firmware signing",
+                    "code signing"
+                ],
+                "implementations": [
+                    "Cisco",
+                    "specialized libraries"
+                ]
+            }
+        ]
+    },
+    "metadata": {
+        "total_algorithms": 134,
+        "stable_count": 78,
+        "evaluation_count": 56,
+        "categories": 14,
+        "standards_bodies": [
+            "NIST",
+            "IETF",
+            "ISO/IEC",
+            "CAESAR",
+            "eSTREAM",
+            "PHC"
+        ],
+        "last_updated": "2025-11",
+        "classification": {
+            "stable": "Production-ready, standardized, or proven through extensive deployment",
+            "under_evaluation": "Experimental, research-stage, competition finalists, or emerging standards"
+        },
+        "notes": [
+            "Post-quantum algorithms are transitioning to standardization (NIST selections)",
+            "Many 'under evaluation' PoW algorithms are actually in production on smaller chains",
+            "CAESAR and eSTREAM competition results still relevant for research",
+            "Lightweight crypto (Ascon) gaining traction for IoT applications"
+        ]
+    }
+}

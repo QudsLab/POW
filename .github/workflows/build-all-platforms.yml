@@ -1,0 +1,310 @@
+name: Build Multi-Platform Binaries
+
+on:
+  push:
+    branches: [ main, master, develop ]
+    paths:
+      - 'src/**'
+      - 'build_scripts/**'
+      - '.github/workflows/**'
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+  schedule:
+    - cron: '0 0 * * 0'  # Weekly build every Sunday
+
+env:
+  BUILD_VERSION: ${{ github.run_number }}
+  RELEASE_URL: ${{ github.server_url }}/${{ github.repository }}/releases/download/v${{ github.run_number }}
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        arch: [x64, x86]
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup MSYS2
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: UCRT64
+          update: true
+          install: >-
+            mingw-w64-ucrt-x86_64-gcc
+            mingw-w64-ucrt-x86_64-openssl
+            make
+      
+      - name: Build Windows ${{ matrix.arch }} DLLs
+        shell: msys2 {0}
+        run: |
+          cd build_scripts
+          bash build_windows.sh ${{ matrix.arch }}
+      
+      - name: Generate Checksums
+        shell: pwsh
+        run: |
+          cd lib/win/${{ matrix.arch }}
+          Get-ChildItem *.dll | ForEach-Object {
+            $sha256 = (Get-FileHash $_.Name -Algorithm SHA256).Hash
+            $md5 = (Get-FileHash $_.Name -Algorithm MD5).Hash
+            "$($_.Name),$sha256,$md5" | Out-File -Append checksums.txt
+          }
+      
+      - name: Upload Windows ${{ matrix.arch }} Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-${{ matrix.arch }}-dlls
+          path: lib/win/${{ matrix.arch }}/*.dll
+          retention-days: 90
+      
+      - name: Upload Checksums
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-${{ matrix.arch }}-checksums
+          path: lib/win/${{ matrix.arch }}/checksums.txt
+
+  build-linux:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        arch: [x64, arm64, armv7]
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential libssl-dev
+          
+      - name: Setup Cross-Compile (ARM)
+        if: matrix.arch != 'x64'
+        run: |
+          sudo apt-get install -y gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
+          sudo apt-get install -y gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf
+      
+      - name: Build Linux ${{ matrix.arch }} .so
+        run: |
+          cd build_scripts
+          bash build_linux.sh ${{ matrix.arch }}
+      
+      - name: Generate Checksums
+        run: |
+          cd lib/linux/${{ matrix.arch }}
+          for file in *.so; do
+            sha256=$(sha256sum "$file" | awk '{print $1}')
+            md5=$(md5sum "$file" | awk '{print $1}')
+            echo "$file,$sha256,$md5" >> checksums.txt
+          done
+      
+      - name: Upload Linux ${{ matrix.arch }} Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-${{ matrix.arch }}-libs
+          path: lib/linux/${{ matrix.arch }}/*.so
+          retention-days: 90
+      
+      - name: Upload Checksums
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-${{ matrix.arch }}-checksums
+          path: lib/linux/${{ matrix.arch }}/checksums.txt
+
+  build-macos:
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        arch: [x64, arm64]
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Install Dependencies
+        run: |
+          brew install openssl@3
+          
+      - name: Build macOS ${{ matrix.arch }} .dylib
+        run: |
+          cd build_scripts
+          bash build_macos.sh ${{ matrix.arch }}
+      
+      - name: Generate Checksums
+        run: |
+          cd lib/macos/${{ matrix.arch }}
+          for file in *.dylib; do
+            sha256=$(shasum -a 256 "$file" | awk '{print $1}')
+            md5=$(md5 -r "$file" | awk '{print $1}')
+            echo "$file,$sha256,$md5" >> checksums.txt
+          done
+      
+      - name: Upload macOS ${{ matrix.arch }} Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-${{ matrix.arch }}-libs
+          path: lib/macos/${{ matrix.arch }}/*.dylib
+          retention-days: 90
+      
+      - name: Upload Checksums
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-${{ matrix.arch }}-checksums
+          path: lib/macos/${{ matrix.arch }}/checksums.txt
+
+  build-wasm:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Emscripten
+        uses: mymindstorm/setup-emsdk@v14
+        with:
+          version: latest
+      
+      - name: Build WebAssembly
+        run: |
+          cd build_scripts
+          bash build_wasm.sh
+      
+      - name: Generate Checksums
+        run: |
+          cd lib/wasm
+          for file in *.wasm *.js; do
+            sha256=$(sha256sum "$file" | awk '{print $1}')
+            md5=$(md5sum "$file" | awk '{print $1}')
+            echo "$file,$sha256,$md5" >> checksums.txt
+          done
+      
+      - name: Upload WASM Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: wasm-modules
+          path: |
+            lib/wasm/*.wasm
+            lib/wasm/*.js
+          retention-days: 90
+      
+      - name: Upload Checksums
+        uses: actions/upload-artifact@v4
+        with:
+          name: wasm-checksums
+          path: lib/wasm/checksums.txt
+
+  build-android:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        abi: [arm64-v8a, armeabi-v7a, x86_64, x86]
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Android NDK
+        uses: nttld/setup-ndk@v1
+        with:
+          ndk-version: r26b
+      
+      - name: Build Android ${{ matrix.abi }}
+        run: |
+          cd build_scripts
+          bash build_android.sh ${{ matrix.abi }}
+      
+      - name: Generate Checksums
+        run: |
+          cd lib/android/${{ matrix.abi }}
+          for file in *.so; do
+            sha256=$(sha256sum "$file" | awk '{print $1}')
+            md5=$(md5sum "$file" | awk '{print $1}')
+            echo "$file,$sha256,$md5" >> checksums.txt
+          done
+      
+      - name: Upload Android ${{ matrix.abi }} Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-${{ matrix.abi }}-libs
+          path: lib/android/${{ matrix.abi }}/*.so
+          retention-days: 90
+      
+      - name: Upload Checksums
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-${{ matrix.abi }}-checksums
+          path: lib/android/${{ matrix.abi }}/checksums.txt
+
+  create-release:
+    needs: [build-windows, build-linux, build-macos, build-wasm, build-android]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Download All Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+      
+      - name: Organize Build Files
+        run: |
+          mkdir -p release/lib
+          
+          # Copy all built libraries maintaining structure
+          cp -r artifacts/windows-x64-dlls release/lib/win/64/ 2>/dev/null || true
+          cp -r artifacts/windows-x86-dlls release/lib/win/32/ 2>/dev/null || true
+          
+          cp -r artifacts/linux-x64-libs release/lib/linux/x64/ 2>/dev/null || true
+          cp -r artifacts/linux-arm64-libs release/lib/linux/arm64/ 2>/dev/null || true
+          cp -r artifacts/linux-armv7-libs release/lib/linux/armv7/ 2>/dev/null || true
+          
+          cp -r artifacts/macos-x64-libs release/lib/macos/x64/ 2>/dev/null || true
+          cp -r artifacts/macos-arm64-libs release/lib/macos/arm64/ 2>/dev/null || true
+          
+          cp -r artifacts/wasm-modules release/lib/wasm/ 2>/dev/null || true
+          
+          cp -r artifacts/android-arm64-v8a-libs release/lib/android/arm64-v8a/ 2>/dev/null || true
+          cp -r artifacts/android-armeabi-v7a-libs release/lib/android/armeabi-v7a/ 2>/dev/null || true
+          cp -r artifacts/android-x86_64-libs release/lib/android/x86_64/ 2>/dev/null || true
+          cp -r artifacts/android-x86-libs release/lib/android/x86/ 2>/dev/null || true
+      
+      - name: Generate versions.json Manifest
+        run: |
+          python3 build_scripts/generate_manifest.py \
+            --release-url "${{ env.RELEASE_URL }}" \
+            --version "${{ env.BUILD_VERSION }}" \
+            --input-dir release/lib \
+            --output release/versions.json
+      
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ env.BUILD_VERSION }}
+          name: Release v${{ env.BUILD_VERSION }}
+          body: |
+            ## Multi-Platform Cryptographic Library Build
+            
+            **Build Number:** ${{ env.BUILD_VERSION }}
+            **Commit:** ${{ github.sha }}
+            **Date:** ${{ github.event.head_commit.timestamp }}
+            
+            ### Platforms
+            - Windows (x64, x86)
+            - Linux (x64, ARM64, ARMv7)
+            - macOS (x64, ARM64/M1)
+            - WebAssembly
+            - Android (arm64-v8a, armeabi-v7a, x86_64, x86)
+            
+            ### Real Algorithm Implementations
+            14 algorithms with native implementations (see versions.json)
+            
+            ### Download
+            See `versions.json` for checksums and direct download links.
+          files: |
+            release/lib/**/*
+            release/versions.json
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Upload versions.json
+        uses: actions/upload-artifact@v4
+        with:
+          name: versions-manifest
+          path: release/versions.json
+          retention-days: 365

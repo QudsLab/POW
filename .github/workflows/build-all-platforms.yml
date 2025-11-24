@@ -135,78 +135,58 @@ jobs:
           path: bin/wasm/
           retention-days: 90
 
-  generate-manifest:
+  commit-binaries:
     needs: [build-windows, build-linux, build-macos, build-android, build-wasm]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
       
       - name: Download All Artifacts
         uses: actions/download-artifact@v4
         with:
-          path: bin
+          path: downloaded-artifacts
       
-      - name: Organize Artifacts
+      - name: Organize binaries
         run: |
-          # Move artifacts to proper locations
-          mkdir -p bin/{windows,linux,macos,wasm,android}
+          echo "Downloaded artifacts:"
+          ls -la downloaded-artifacts/
           
-          # Move binaries from artifact directories
-          if [ -d "bin/windows-binaries" ]; then
-            cp -r bin/windows-binaries/* bin/windows/ 2>/dev/null || true
-            rm -rf bin/windows-binaries
-          fi
+          # Create bin directory
+          mkdir -p bin
           
-          if [ -d "bin/linux-binaries" ]; then
-            cp -r bin/linux-binaries/* bin/linux/ 2>/dev/null || true
-            rm -rf bin/linux-binaries
-          fi
+          # Move artifacts to bin/ (they already have correct structure)
+          for artifact_dir in downloaded-artifacts/*-binaries; do
+            if [ -d "$artifact_dir" ]; then
+              platform=$(basename "$artifact_dir" | sed 's/-binaries$//')
+              echo "Processing $platform"
+              ls -la "$artifact_dir/"
+              cp -rv "$artifact_dir"/* bin/ || true
+            fi
+          done
           
-          if [ -d "bin/macos-binaries" ]; then
-            cp -r bin/macos-binaries/* bin/macos/ 2>/dev/null || true
-            rm -rf bin/macos-binaries
-          fi
-          
-          if [ -d "bin/wasm-binaries" ]; then
-            cp -r bin/wasm-binaries/* bin/wasm/ 2>/dev/null || true
-            rm -rf bin/wasm-binaries
-          fi
-          
-          if [ -d "bin/android-binaries" ]; then
-            cp -r bin/android-binaries/* bin/android/ 2>/dev/null || true
-            rm -rf bin/android-binaries
-          fi
-          
-          # List all files
-          echo "=== Binary Directory Structure ==="
-          find bin -type f | sort
+          echo "Final bin structure:"
+          find bin -type f -ls
       
-      - name: Generate versions.json Manifest
-        env:
-          BUILD_VERSION: ${{ env.BUILD_VERSION }}
-          GITHUB_SHA: ${{ github.sha }}
-          GITHUB_REPOSITORY: ${{ env.REPO }}
+      - name: Generate versions.json
         run: |
           python3 generate_manifest.py bin bin/versions.json
-      
-      - name: Copy BINARY_INFO.md to bin
-        run: |
           cp BINARY_INFO.md bin/BINARY_INFO.md
-      
-      - name: Display Manifest
-        run: |
-          echo "=== versions.json ==="
           cat bin/versions.json
       
-      - name: Commit binaries to repository
+      - name: Configure Git
         run: |
-          git config --global user.name "GitHub Actions"
-          git config --global user.email "actions@github.com"
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+      
+      - name: Commit and push
+        run: |
           git add bin/
-          git commit -m "Build v${{ env.BUILD_VERSION }} - Auto-generated binaries [skip ci]" || echo "No changes to commit"
-          git push || echo "Nothing to push"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          if git diff --staged --quiet; then
+            echo "No changes"
+          else
+            git commit -m "Build v${{ env.BUILD_VERSION }}: Update binaries [skip ci]"
+            git pull --no-rebase origin main || true
+            git push origin main || git push
+          fi

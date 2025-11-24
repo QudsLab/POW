@@ -97,10 +97,10 @@ CLIENT_DLL = $(BIN_DIR)/client$(DLL_EXT)
 .PHONY: all clean rebuild info help
 
 all: $(SERVER_DLL) $(CLIENT_DLL)
-	@echo.
-	@echo Build Complete!
-	@echo   Server DLL: $(SERVER_DLL)
-	@echo   Client DLL: $(CLIENT_DLL)
+	@echo ""
+	@echo "Build Complete!"
+	@echo "  Server DLL: $(SERVER_DLL)"
+	@echo "  Client DLL: $(CLIENT_DLL)"
 
 # Create build directories
 $(OBJ_DIR):
@@ -185,29 +185,29 @@ $(CLIENT_DLL): $(CLIENT_OBJS) | $(BIN_DIR)
 
 # Info target
 info:
-	@echo.
-	@echo === Build Information ===
-	@echo C files: $(words $(C_SRCS))
-	@echo C++ files: $(words $(CPP_SRCS))
-	@echo Total: $(words $(C_SRCS) $(CPP_SRCS))
-	@echo.
-	@echo Output:
-	@echo   $(SERVER_DLL)
-	@echo   $(CLIENT_DLL)
+	@echo ""
+	@echo "=== Build Information ==="
+	@echo "C files: $(words $(C_SRCS))"
+	@echo "C++ files: $(words $(CPP_SRCS))"
+	@echo "Total: $(words $(C_SRCS) $(CPP_SRCS))"
+	@echo ""
+	@echo "Output:"
+	@echo "  $(SERVER_DLL)"
+	@echo "  $(CLIENT_DLL)"
 
 # Clean build artifacts
 clean:
 	rm -rf $(OBJ_DIR) $(BIN_DIR)
-	@echo Cleaned.
+	@echo "Cleaned."
 
 rebuild: clean all
 
 help:
-	@echo.
-	@echo PoW System Build Commands:
-	@echo   make all       - Build both server and client DLLs
-	@echo   make clean     - Remove all build files
-	@echo   make rebuild   - Clean and rebuild
-	@echo   make info      - Show build information
-	@echo   make help      - Show this help
-	@echo.
+	@echo ""
+	@echo "PoW System Build Commands:"
+	@echo "  make all       - Build both server and client DLLs"
+	@echo "  make clean     - Remove all build files"
+	@echo "  make rebuild   - Clean and rebuild"
+	@echo "  make info      - Show build information"
+	@echo "  make help      - Show this help"
+	@echo ""

@@ -1,0 +1,106 @@
+{
+  "version": "11",
+  "repository": "qudslab/pow",
+  "release_url": "https://github.com/qudslab/pow/releases/download/v11",
+  "platforms": {
+    "windows": {
+      "variants": {
+        "32bit": {
+          "binaries": [
+            {
+              "name": "server.dll",
+              "type": ".dll",
+              "size": 180739,
+              "sha256": "7fb3d5476f62c7da084c291582c0b16ea8592c67514d6b3088703790e9e76d27",
+              "md5": "2a160e5ced66c687b035c092c7200ea8",
+              "download_url": "https://github.com/qudslab/pow/releases/download/v11/windows/32/server.dll"
+            },
+            {
+              "name": "client.dll",
+              "type": ".dll",
+              "size": 181587,
+              "sha256": "a030d50c80358b2c2993392795b6745655ada812f3f651774f04ab44b8e2f87c",
+              "md5": "6e0aa0b17d527868f00a0c6e38079640",
+              "download_url": "https://github.com/qudslab/pow/releases/download/v11/windows/32/client.dll"
+            }
+          ]
+        }
+      }
+    },
+    "linux": {
+      "variants": {
+        "32bit": {
+          "binaries": [
+            {
+              "name": "server.so",
+              "type": ".so",
+              "size": 99480,
+              "sha256": "fa628e808c16d535f53ae1a339aa225a6f9a527dcc086a87988d9cfaf2ed45ba",
+              "md5": "e3df9c7c08c04ce962736a672aad769f",
+              "download_url": "https://github.com/qudslab/pow/releases/download/v11/linux/32/server.so"
+            },
+            {
+              "name": "client.so",
+              "type": ".so",
+              "size": 99480,
+              "sha256": "a490e86c5a22d3ec58866868866e0b92e2a1bdbc86da5eaa71e68f484fd34917",
+              "md5": "443a8535311618c27e6ac0145c6c1820",
+              "download_url": "https://github.com/qudslab/pow/releases/download/v11/linux/32/client.so"
+            }
+          ]
+        }
+      }
+    },
+    "macos": {
+      "variants": {
+        "64bit": {
+          "binaries": [
+            {
+              "name": "client.dylib",
+              "type": ".dylib",
+              "size": 93648,
+              "sha256": "520482f0a9369b0e3298a29c9839283386320bc0b09426c6ccb2599d4d92763e",
+              "md5": "853d8d1a9c2268427f6a8840f7cd5f3b",
+              "download_url": "https://github.com/qudslab/pow/releases/download/v11/macos/64/client.dylib"
+            },
+            {
+              "name": "server.dylib",
+              "type": ".dylib",
+              "size": 93696,
+              "sha256": "c8b8fd74110c6a36a6518c43e4a858362452cedf49736e815423f77a3cf117e6",
+              "md5": "1fcb95d27dadcaf49e28799ca7b828ac",
+              "download_url": "https://github.com/qudslab/pow/releases/download/v11/macos/64/server.dylib"
+            }
+          ]
+        }
+      }
+    },
+    "wasm": {
+      "variants": {}
+    },
+    "android": {
+      "variants": {
+        "32bit": {
+          "binaries": [
+            {
+              "name": "server.so",
+              "type": ".so",
+              "size": 99480,
+              "sha256": "fa628e808c16d535f53ae1a339aa225a6f9a527dcc086a87988d9cfaf2ed45ba",
+              "md5": "e3df9c7c08c04ce962736a672aad769f",
+              "download_url": "https://github.com/qudslab/pow/releases/download/v11/android/32/server.so"
+            },
+            {
+              "name": "client.so",
+              "type": ".so",
+              "size": 99480,
+              "sha256": "a490e86c5a22d3ec58866868866e0b92e2a1bdbc86da5eaa71e68f484fd34917",
+              "md5": "443a8535311618c27e6ac0145c6c1820",
+              "download_url": "https://github.com/qudslab/pow/releases/download/v11/android/32/client.so"
+            }
+          ]
+        }
+      }
+    }
+  }
+}

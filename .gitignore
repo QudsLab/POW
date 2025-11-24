@@ -1,0 +1,34 @@
+# Build artifacts
+bin/*.dll
+bin/*.so
+bin/*.dylib
+bin/*.wasm
+bin/*.js
+obj/
+*.obj
+*.o
+
+# Platform-specific binaries
+bin/windows/
+bin/linux/
+bin/macos/
+bin/wasm/
+bin/android/
+
+# Keep manifest and documentation
+!bin/versions.json
+!bin/BINARY_INFO.md
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs
+*.log

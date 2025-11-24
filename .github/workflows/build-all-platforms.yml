@@ -6,6 +6,8 @@ on:
     paths:
       - 'src/**'
       - 'Makefile'
+      - 'build_*.sh'
+      - 'generate_manifest.py'
       - '.github/workflows/**'
   pull_request:
     branches: [ main, master ]
@@ -16,20 +18,11 @@ on:
 env:
   BUILD_VERSION: ${{ github.run_number }}
   REPO: qudslab/pow
-  RELEASE_URL: ${{ github.server_url }}/qudslab/pow/releases/download/v${{ github.run_number }}
+  RELEASE_URL: https://github.com/qudslab/pow/releases/download/v${{ github.run_number }}
 
 jobs:
   build-windows:
     runs-on: windows-latest
-    strategy:
-      matrix:
-        include:
-          - arch: x64
-            bits: 64
-            msys_arch: ucrt-x86_64
-          - arch: x86
-            bits: 32
-            msys_arch: ucrt-i686
     steps:
       - uses: actions/checkout@v4
       
@@ -40,208 +33,66 @@ jobs:
           update: true
           install: >-
             mingw-w64-ucrt-x86_64-gcc
-            mingw-w64-ucrt-x86_64-g++
             mingw-w64-ucrt-x86_64-make
-            mingw-w64-i686-gcc
-            mingw-w64-i686-g++
-            mingw-w64-i686-make
+            make
       
-      - name: Build Windows ${{ matrix.bits }}bit
+      - name: Build Windows Binaries
         shell: msys2 {0}
         run: |
-          make clean
-          make all
-          mkdir -p bin/windows/${{ matrix.bits }}
-          cp bin/*.dll bin/windows/${{ matrix.bits }}/ || true
+          chmod +x build_windows.sh
+          bash build_windows.sh
       
-      - name: Generate Checksums (Windows)
-        shell: pwsh
-        run: |
-          $binPath = "bin/windows/${{ matrix.bits }}"
-          if (Test-Path $binPath) {
-            Get-ChildItem "$binPath/*.dll" | ForEach-Object {
-              $sha256 = (Get-FileHash $_.FullName -Algorithm SHA256).Hash
-              $md5 = (Get-FileHash $_.FullName -Algorithm MD5).Hash
-              @{
-                name = $_.Name
-                sha256 = $sha256
-                md5 = $md5
-              } | ConvertTo-Json -AsArray | Out-File "$binPath/$($_.BaseName).json"
-            }
-          }
-      
-      - name: Upload Windows ${{ matrix.bits }}bit Artifacts
+      - name: Upload Windows Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: windows-${{ matrix.bits }}bit
-          path: bin/windows/${{ matrix.bits }}/
+          name: windows-binaries
+          path: bin/windows/
           retention-days: 90
 
   build-linux:
+    needs: build-windows
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        include:
-          - arch: x64
-            bits: 64
-            cc_flags: ""
-          - arch: x86
-            bits: 32
-            cc_flags: "-m32"
-          - arch: arm64
-            bits: 64
-            cc_flags: "-march=armv8-a"
-          - arch: armv7
-            bits: 32
-            cc_flags: "-march=armv7-a"
     steps:
       - uses: actions/checkout@v4
       
       - name: Install Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential
-          if [ "${{ matrix.bits }}" = "32" ] && [ "${{ matrix.arch }}" = "x86" ]; then
-            sudo apt-get install -y gcc-multilib g++-multilib
-          fi
+          sudo apt-get install -y build-essential gcc-multilib g++-multilib
       
-      - name: Setup Cross-Compile (ARM)
-        if: matrix.arch != 'x64' && matrix.arch != 'x86'
+      - name: Build Linux Binaries
         run: |
-          if [ "${{ matrix.arch }}" = "arm64" ]; then
-            sudo apt-get install -y gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
-          elif [ "${{ matrix.arch }}" = "armv7" ]; then
-            sudo apt-get install -y gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf
-          fi
+          chmod +x build_linux.sh
+          bash build_linux.sh
       
-      - name: Build Linux ${{ matrix.arch }} (${{ matrix.bits }}bit)
-        run: |
-          make clean
-          CFLAGS="-w -O2 -std=c99 -fPIC ${{ matrix.cc_flags }}" make all
-          mkdir -p bin/linux/${{ matrix.bits }}
-          cp bin/*.so bin/linux/${{ matrix.bits }}/ || true
-      
-      - name: Generate Checksums (Linux)
-        run: |
-          for file in bin/linux/${{ matrix.bits }}/*.so; do
-            if [ -f "$file" ]; then
-              sha256=$(sha256sum "$file" | awk '{print $1}')
-              md5=$(md5sum "$file" | awk '{print $1}')
-              basename=$(basename "$file")
-              echo "{\"name\":\"$basename\",\"sha256\":\"$sha256\",\"md5\":\"$md5\"}" > "${file%.so}.json"
-            fi
-          done
-      
-      - name: Upload Linux ${{ matrix.arch }} (${{ matrix.bits }}bit) Artifacts
+      - name: Upload Linux Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: linux-${{ matrix.arch }}-${{ matrix.bits }}bit
-          path: bin/linux/${{ matrix.bits }}/
+          name: linux-binaries
+          path: bin/linux/
           retention-days: 90
 
   build-macos:
+    needs: build-linux
     runs-on: macos-latest
-    strategy:
-      matrix:
-        include:
-          - arch: x86_64
-            bits: 64
-            sdk_flags: "-mmacosx-version-min=10.9"
-          - arch: arm64
-            bits: 64
-            sdk_flags: "-mmacosx-version-min=11.0"
     steps:
       - uses: actions/checkout@v4
       
-      - name: Build macOS ${{ matrix.arch }} (${{ matrix.bits }}bit)
+      - name: Build macOS Binaries
         run: |
-          make clean
-          CFLAGS="-w -O2 -std=c99 -fPIC ${{ matrix.sdk_flags }}" \
-          CXXFLAGS="-w -O2 -std=c++11 -fPIC ${{ matrix.sdk_flags }}" \
-          make all
-          mkdir -p bin/macos/${{ matrix.bits }}
-          cp bin/*.dylib bin/macos/${{ matrix.bits }}/ || true
+          chmod +x build_macos.sh
+          bash build_macos.sh
       
-      - name: Generate Checksums (macOS)
-        run: |
-          for file in bin/macos/${{ matrix.bits }}/*.dylib; do
-            if [ -f "$file" ]; then
-              sha256=$(shasum -a 256 "$file" | awk '{print $1}')
-              md5=$(md5 -r "$file" | awk '{print $1}')
-              basename=$(basename "$file")
-              echo "{\"name\":\"$basename\",\"sha256\":\"$sha256\",\"md5\":\"$md5\"}" > "${file%.dylib}.json"
-            fi
-          done
-      
-      - name: Upload macOS ${{ matrix.arch }} (${{ matrix.bits }}bit) Artifacts
+      - name: Upload macOS Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: macos-${{ matrix.arch }}-${{ matrix.bits }}bit
-          path: bin/macos/${{ matrix.bits }}/
-          retention-days: 90
-
-  build-wasm:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        include:
-          - variant: wasm32
-            bits: 32
-            flags: "-s WASM=1 -s SIDE_MODULE=1"
-          - variant: wasm64
-            bits: 64
-            flags: "-s WASM=1 -s SIDE_MODULE=1 -s MEMORY64=1"
-    steps:
-      - uses: actions/checkout@v4
-      
-      - name: Setup Emscripten
-        uses: mymindstorm/setup-emsdk@v14
-        with:
-          version: latest
-      
-      - name: Build WebAssembly ${{ matrix.variant }} (${{ matrix.bits }}bit)
-        run: |
-          make clean
-          CC=emcc CXX=em++ CFLAGS="-w -O2 -std=c99 ${{ matrix.flags }}" make all 2>&1 || true
-          mkdir -p bin/wasm/${{ matrix.bits }}
-          cp bin/*.wasm bin/wasm/${{ matrix.bits }}/ 2>/dev/null || true
-          cp bin/*.js bin/wasm/${{ matrix.bits }}/ 2>/dev/null || true
-      
-      - name: Generate Checksums (WASM)
-        run: |
-          for file in bin/wasm/${{ matrix.bits }}/*; do
-            if [ -f "$file" ]; then
-              sha256=$(sha256sum "$file" | awk '{print $1}')
-              md5=$(md5sum "$file" | awk '{print $1}')
-              basename=$(basename "$file")
-              echo "{\"name\":\"$basename\",\"sha256\":\"$sha256\",\"md5\":\"$md5\"}" > "${file}.json"
-            fi
-          done
-      
-      - name: Upload WASM ${{ matrix.variant }} Artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: wasm-${{ matrix.bits }}bit
-          path: bin/wasm/${{ matrix.bits }}/
+          name: macos-binaries
+          path: bin/macos/
           retention-days: 90
 
   build-android:
+    needs: build-macos
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        include:
-          - abi: arm64-v8a
-            bits: 64
-            ndk_arch: aarch64
-          - abi: armeabi-v7a
-            bits: 32
-            ndk_arch: armv7
-          - abi: x86_64
-            bits: 64
-            ndk_arch: x86_64
-          - abi: x86
-            bits: 32
-            ndk_arch: i686
     steps:
       - uses: actions/checkout@v4
       
@@ -250,33 +101,43 @@ jobs:
         with:
           ndk-version: r26b
       
-      - name: Build Android ${{ matrix.abi }} (${{ matrix.bits }}bit)
+      - name: Build Android Binaries
         run: |
-          make clean
-          mkdir -p bin/android/${{ matrix.bits }}
-          make all 2>&1 || true
-          cp bin/*.so bin/android/${{ matrix.bits }}/ 2>/dev/null || true
+          chmod +x build_android.sh
+          bash build_android.sh
       
-      - name: Generate Checksums (Android)
-        run: |
-          for file in bin/android/${{ matrix.bits }}/*.so; do
-            if [ -f "$file" ]; then
-              sha256=$(sha256sum "$file" | awk '{print $1}')
-              md5=$(md5sum "$file" | awk '{print $1}')
-              basename=$(basename "$file")
-              echo "{\"name\":\"$basename\",\"sha256\":\"$sha256\",\"md5\":\"$md5\"}" > "${file%.so}.json"
-            fi
-          done
-      
-      - name: Upload Android ${{ matrix.abi }} (${{ matrix.bits }}bit) Artifacts
+      - name: Upload Android Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: android-${{ matrix.abi }}-${{ matrix.bits }}bit
-          path: bin/android/${{ matrix.bits }}/
+          name: android-binaries
+          path: bin/android/
           retention-days: 90
 
-  create-release:
-    needs: [build-windows, build-linux, build-macos, build-wasm, build-android]
+  build-wasm:
+    needs: build-android
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Emscripten
+        uses: mymindstorm/setup-emsdk@v14
+        with:
+          version: latest
+      
+      - name: Build WebAssembly Binaries
+        run: |
+          chmod +x build_wasm.sh
+          bash build_wasm.sh
+      
+      - name: Upload WASM Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: wasm-binaries
+          path: bin/wasm/
+          retention-days: 90
+
+  generate-manifest:
+    needs: build-wasm
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -284,292 +145,79 @@ jobs:
       - name: Download All Artifacts
         uses: actions/download-artifact@v4
         with:
-          path: artifacts
+          path: bin
       
-      - name: Organize Build Files
+      - name: Organize Artifacts
         run: |
+          # Move artifacts to proper locations
           mkdir -p bin/{windows,linux,macos,wasm,android}
           
-          # Windows (32 & 64 bit)
-          mkdir -p bin/windows/32
-          mkdir -p bin/windows/64
-          cp -r artifacts/windows-32bit/* bin/windows/32/ 2>/dev/null || true
-          cp -r artifacts/windows-64bit/* bin/windows/64/ 2>/dev/null || true
+          # Move binaries from artifact directories
+          if [ -d "bin/windows-binaries" ]; then
+            cp -r bin/windows-binaries/* bin/windows/ 2>/dev/null || true
+            rm -rf bin/windows-binaries
+          fi
           
-          # Linux (x86 32/64, ARM 32/64, WebAssembly)
-          mkdir -p bin/linux/32
-          mkdir -p bin/linux/64
-          cp -r artifacts/linux-x86-32bit/* bin/linux/32/ 2>/dev/null || true
-          cp -r artifacts/linux-x64-64bit/* bin/linux/64/ 2>/dev/null || true
-          cp -r artifacts/linux-arm64-64bit/* bin/linux/64/ 2>/dev/null || true
-          cp -r artifacts/linux-armv7-32bit/* bin/linux/32/ 2>/dev/null || true
+          if [ -d "bin/linux-binaries" ]; then
+            cp -r bin/linux-binaries/* bin/linux/ 2>/dev/null || true
+            rm -rf bin/linux-binaries
+          fi
           
-          # macOS (x86_64 & ARM64)
-          mkdir -p bin/macos/64
-          cp -r artifacts/macos-x86_64-64bit/* bin/macos/64/ 2>/dev/null || true
-          cp -r artifacts/macos-arm64-64bit/* bin/macos/64/ 2>/dev/null || true
+          if [ -d "bin/macos-binaries" ]; then
+            cp -r bin/macos-binaries/* bin/macos/ 2>/dev/null || true
+            rm -rf bin/macos-binaries
+          fi
           
-          # WebAssembly (32 & 64 bit)
-          mkdir -p bin/wasm/32
-          mkdir -p bin/wasm/64
-          cp -r artifacts/wasm-32bit/* bin/wasm/32/ 2>/dev/null || true
-          cp -r artifacts/wasm-64bit/* bin/wasm/64/ 2>/dev/null || true
+          if [ -d "bin/wasm-binaries" ]; then
+            cp -r bin/wasm-binaries/* bin/wasm/ 2>/dev/null || true
+            rm -rf bin/wasm-binaries
+          fi
           
-          # Android (all architectures, organized by bit)
-          mkdir -p bin/android/32
-          mkdir -p bin/android/64
-          cp -r artifacts/android-armeabi-v7a-32bit/* bin/android/32/ 2>/dev/null || true
-          cp -r artifacts/android-x86-32bit/* bin/android/32/ 2>/dev/null || true
-          cp -r artifacts/android-arm64-v8a-64bit/* bin/android/64/ 2>/dev/null || true
-          cp -r artifacts/android-x86_64-64bit/* bin/android/64/ 2>/dev/null || true
+          if [ -d "bin/android-binaries" ]; then
+            cp -r bin/android-binaries/* bin/android/ 2>/dev/null || true
+            rm -rf bin/android-binaries
+          fi
+          
+          # List all files
+          echo "=== Binary Directory Structure ==="
+          find bin -type f | sort
       
       - name: Generate versions.json Manifest
+        env:
+          BUILD_VERSION: ${{ env.BUILD_VERSION }}
+          GITHUB_SHA: ${{ github.sha }}
+          GITHUB_REPOSITORY: ${{ env.REPO }}
         run: |
-          python3 << 'EOF'
-          import json
-          import os
-          import glob
-          from pathlib import Path
-          
-          manifest = {
-              "version": "${{ env.BUILD_VERSION }}",
-              "repository": "${{ env.REPO }}",
-              "release_url": "${{ env.RELEASE_URL }}",
-              "platforms": {}
-          }
-          
-          # Scan all directories
-          for os_name in ["windows", "linux", "macos", "wasm", "android"]:
-              os_dir = f"bin/{os_name}"
-              if os.path.isdir(os_dir):
-                  manifest["platforms"][os_name] = {
-                      "variants": {}
-                  }
-                  
-                  for bits_dir in os.listdir(os_dir):
-                      bits_path = os.path.join(os_dir, bits_dir)
-                      if os.path.isdir(bits_path):
-                          manifest["platforms"][os_name]["variants"][f"{bits_dir}bit"] = {
-                              "binaries": []
-                          }
-                          
-                          # Find all binaries
-                          for binary in glob.glob(f"{bits_path}/*"):
-                              if os.path.isfile(binary) and not binary.endswith('.json'):
-                                  basename = os.path.basename(binary)
-                                  ext = os.path.splitext(binary)[1]
-                                  
-                                  # Check for checksum file
-                                  checksum_file = f"{binary}.json"
-                                  checksums = {}
-                                  if os.path.isfile(checksum_file):
-                                      with open(checksum_file) as cf:
-                                          checksums = json.load(cf)
-                                  
-                                  binary_info = {
-                                      "name": basename,
-                                      "type": ext,
-                                      "size": os.path.getsize(binary),
-                                      "sha256": checksums.get("sha256", ""),
-                                      "md5": checksums.get("md5", ""),
-                                      "download_url": f"https://github.com/${{ env.REPO }}/releases/download/v${{ env.BUILD_VERSION }}/{os_name}/{bits_dir}/{basename}"
-                                  }
-                                  manifest["platforms"][os_name]["variants"][f"{bits_dir}bit"]["binaries"].append(binary_info)
-          
-          # Write manifest
-          with open("bin/versions.json", "w") as f:
-              json.dump(manifest, f, indent=2)
-          
-          print("Manifest generated successfully")
-          print(json.dumps(manifest, indent=2))
-          EOF
+          python3 generate_manifest.py bin bin/versions.json
       
-      - name: Generate README.md Documentation
+      - name: Copy BINARY_INFO.md to bin
         run: |
-          cat > bin/BINARY_INFO.md << 'EOF'
-          # POW (Proof of Work) Cryptographic Library - Binary Information
-          
-          This document provides information about how POW binaries are organized, versioned, and distributed.
-          
-          ## Directory Structure
-          
-          ```
-          bin/
-          ├── versions.json              # Master manifest with all checksums and download links
-          ├── BINARY_INFO.md             # This file
-          ├── windows/
-          │   ├── 32/                    # 32-bit Windows DLLs
-          │   └── 64/                    # 64-bit Windows DLLs
-          ├── linux/
-          │   ├── 32/                    # 32-bit Linux libraries (x86, ARMv7)
-          │   └── 64/                    # 64-bit Linux libraries (x64, ARM64)
-          ├── macos/
-          │   └── 64/                    # macOS universal binaries (Intel & Apple Silicon)
-          ├── wasm/
-          │   ├── 32/                    # 32-bit WebAssembly modules
-          │   └── 64/                    # 64-bit WebAssembly modules
-          └── android/
-              ├── 32/                    # 32-bit Android libraries (ARMv7, x86)
-              └── 64/                    # 64-bit Android libraries (ARM64, x86_64)
-          ```
-          
-          ## Version Information
-          
-          - **Build Number**: ${{ env.BUILD_VERSION }}
-          - **Repository**: https://github.com/${{ env.REPO }}
-          - **Release**: https://github.com/${{ env.REPO }}/releases/tag/v${{ env.BUILD_VERSION }}
-          
-          ## How We Handle Binaries
-          
-          ### Organization Strategy
-          
-          1. **Bit-based Organization**: All binaries are organized primarily by architecture bit-width (32-bit or 64-bit)
-          2. **Platform Separation**: Each operating system has its own directory
-          3. **Checksum Validation**: Every binary includes SHA-256 and MD5 checksums
-          4. **Centralized Manifest**: `versions.json` contains metadata for all binaries
-          
-          ### File Naming Convention
-          
-          - **Windows**: `{name}.dll` (Dynamic Link Library)
-          - **Linux**: `{name}.so` (Shared Object)
-          - **macOS**: `{name}.dylib` (Dynamic Library)
-          - **WebAssembly**: `{name}.wasm`, `{name}.js`
-          - **Android**: `{name}.so` (Shared Object)
-          
-          ### Checksum Files
-          
-          Each binary has an associated `.json` checksum file containing:
-          ```json
-          {
-              "name": "binary_name.ext",
-              "sha256": "hex_string",
-              "md5": "hex_string"
-          }
-          ```
-          
-          ## Manifest (versions.json)
-          
-          The `versions.json` file contains:
-          
-          - **Build metadata** (version number, repository)
-          - **Release download URL** (base URL for artifacts)
-          - **Platform information** (organized by OS and bit-width)
-          - **Binary details** for each file:
-              - Name and type
-              - File size (bytes)
-              - SHA-256 and MD5 checksums
-              - Direct download link
-          
-          ### Sample Manifest Structure
-          
-          ```json
-          {
-              "version": "123",
-              "repository": "qudslab/pow",
-              "release_url": "https://github.com/qudslab/pow/releases/download/v123",
-              "platforms": {
-                  "windows": {
-                      "variants": {
-                          "32bit": {
-                              "binaries": [
-                                  {
-                                      "name": "server.dll",
-                                      "type": ".dll",
-                                      "size": 1024000,
-                                      "sha256": "...",
-                                      "md5": "...",
-                                      "download_url": "..."
-                                  }
-                              ]
-                          },
-                          "64bit": { ... }
-                      }
-                  },
-                  "linux": { ... },
-                  "macos": { ... },
-                  "wasm": { ... },
-                  "android": { ... }
-              }
-          }
-          ```
-          
-          ## Supported Platforms
-          
-          ### Windows
-          - 32-bit (x86)
-          - 64-bit (x64)
-          
-          ### Linux
-          - 32-bit: x86, ARMv7
-          - 64-bit: x64, ARM64
-          
-          ### macOS
-          - 64-bit: x86_64 (Intel), ARM64 (Apple Silicon)
-          
-          ### WebAssembly
-          - 32-bit (WASM32)
-          - 64-bit (WASM64 with Memory64)
-          
-          ### Android
-          - 32-bit: ARMv7 (armeabi-v7a), x86
-          - 64-bit: ARM64 (arm64-v8a), x86_64
-          
-          ## Verification & Security
-          
-          ### Verifying Binary Integrity
-          
-          1. Download a binary and its manifest
-          2. Compute SHA-256 hash:
-             ```bash
-             sha256sum binary_file
-             ```
-          3. Compare with value in `versions.json`
-          4. If hashes match, the binary is verified
-          
-          ### Checksum Examples
-          
-          - **SHA-256**: 256-bit hash (primary verification)
-          - **MD5**: 128-bit hash (legacy support)
-          
-          ## Use Cases
-          
-          ### Integration Points
-          
-          1. **Embedded Systems**: Use Linux 32-bit for resource-constrained devices
-          2. **Web Applications**: Use WebAssembly variants for browser-based PoW
-          3. **Mobile Apps**: Use Android variants for native mobile integration
-          4. **Desktop Applications**: Use Windows/macOS variants
-          5. **Server Infrastructure**: Use Linux 64-bit for high-performance deployments
-          
-          ### Download & Deploy
-          
-          1. Query `versions.json` for available binaries
-          2. Download desired binary using the `download_url` field
-          3. Verify SHA-256 checksum
-          4. Deploy to target platform
-          
-          ## Build Information
-          
-          All binaries are compiled with:
-          - **Optimization**: `-O2` (performance-optimized)
-          - **Warnings**: `-w` (disabled, production-ready)
-          - **Standard Compliance**: C99 (C), C++11 (C++)
-          - **Position Independent Code**: `-fPIC` (for shared libraries)
-          
-          ## Build Triggers
-          
-          This workflow automatically runs on:
-          - Push to `main`, `master`, or `develop` branches (if `src/**` or `Makefile` changes)
-          - Pull requests to `main` or `master`
-          - Manual workflow dispatch (`workflow_dispatch`)
-          - Weekly schedule (Sunday at 00:00 UTC)
-          
-          ---
-          
-          **Generated**: ${{ github.event.head_commit.timestamp }}
-          **Commit**: ${{ github.sha }}
-          **Repository**: https://github.com/${{ env.REPO }}
-          EOF
+          cp BINARY_INFO.md bin/BINARY_INFO.md
+      
+      - name: Display Manifest
+        run: |
+          echo "=== versions.json ==="
+          cat bin/versions.json
+      
+      - name: Upload Complete Artifact Bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: all-binaries-with-manifest
+          path: bin/
+          retention-days: 365
+
+  create-release:
+    needs: generate-manifest
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Download Complete Bundle
+        uses: actions/download-artifact@v4
+        with:
+          name: all-binaries-with-manifest
+          path: bin
       
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
@@ -586,10 +234,10 @@ jobs:
             ### 📦 Available Platforms
             
             - **Windows**: 32-bit & 64-bit DLLs
-            - **Linux**: x86, x64, ARMv7, ARM64 (32 & 64-bit)
-            - **macOS**: Intel & Apple Silicon (Universal 64-bit)
-            - **WebAssembly**: 32-bit & 64-bit modules with Memory64 support
-            - **Android**: ARMv7, ARM64, x86, x86_64 (32 & 64-bit)
+            - **Linux**: x86 (32-bit), x64 (64-bit)
+            - **macOS**: Universal 64-bit (Intel & Apple Silicon)
+            - **WebAssembly**: 32-bit & 64-bit modules
+            - **Android**: ARMv7 & ARM64
             
             ### 📋 Contents
             
@@ -603,7 +251,7 @@ jobs:
             
             See `BINARY_INFO.md` for detailed information about directory structure and usage.
           files: |
-            bin/**
+            bin/**/*
           draft: false
           prerelease: false
         env:

@@ -151,20 +151,37 @@ jobs:
       - name: Organize binaries
         run: |
           echo "Downloaded artifacts:"
-          ls -la downloaded-artifacts/
+          ls -laR downloaded-artifacts/
           
-          # Create bin directory
           mkdir -p bin
           
-          # Move artifacts to bin/ (they already have correct structure)
-          for artifact_dir in downloaded-artifacts/*-binaries; do
-            if [ -d "$artifact_dir" ]; then
-              platform=$(basename "$artifact_dir" | sed 's/-binaries$//')
-              echo "Processing $platform"
-              ls -la "$artifact_dir/"
-              cp -rv "$artifact_dir"/* bin/ || true
-            fi
-          done
+          # Artifacts are downloaded as: downloaded-artifacts/{platform}-binaries/{32|64}/files
+          # We need: bin/{platform}/{32|64}/files
+          
+          if [ -d "downloaded-artifacts/windows-binaries" ]; then
+            mkdir -p bin/windows
+            cp -rv downloaded-artifacts/windows-binaries/* bin/windows/
+          fi
+          
+          if [ -d "downloaded-artifacts/linux-binaries" ]; then
+            mkdir -p bin/linux
+            cp -rv downloaded-artifacts/linux-binaries/* bin/linux/
+          fi
+          
+          if [ -d "downloaded-artifacts/macos-binaries" ]; then
+            mkdir -p bin/macos
+            cp -rv downloaded-artifacts/macos-binaries/* bin/macos/
+          fi
+          
+          if [ -d "downloaded-artifacts/android-binaries" ]; then
+            mkdir -p bin/android
+            cp -rv downloaded-artifacts/android-binaries/* bin/android/
+          fi
+          
+          if [ -d "downloaded-artifacts/wasm-binaries" ]; then
+            mkdir -p bin/wasm
+            cp -rv downloaded-artifacts/wasm-binaries/* bin/wasm/
+          fi
           
           echo "Final bin structure:"
           find bin -type f -ls

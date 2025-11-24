@@ -8,12 +8,13 @@ echo "=== Building WebAssembly Binaries ==="
 if ! command -v emcc &> /dev/null; then
     echo "Emscripten not found, building regular binaries as .wasm..."
     
-    # Build 32-bit
-    echo "Building 32-bit WebAssembly..."
+    # Build once
+    echo "Building binaries..."
     make clean
     make all
+    
+    # Copy to 32-bit
     mkdir -p bin/wasm/32
-    # Copy and rename binaries to .wasm extension
     if ls bin/*.so 1> /dev/null 2>&1; then
         for file in bin/*.so; do
             basename=$(basename "$file" .so)
@@ -33,10 +34,14 @@ if ! command -v emcc &> /dev/null; then
         done
     fi
     
-    # Build 64-bit (same as 32-bit for now)
-    echo "Building 64-bit WebAssembly..."
+    # Copy to 64-bit
     mkdir -p bin/wasm/64
-    cp bin/wasm/32/*.wasm bin/wasm/64/ 2>/dev/null || echo "Copied from 32-bit"
+    if [ "$(ls -A bin/wasm/32 2>/dev/null)" ]; then
+        cp bin/wasm/32/*.wasm bin/wasm/64/
+        echo "Copied to 64-bit directory"
+    else
+        echo "Warning: No files in 32-bit directory"
+    fi
 else
     # Build with Emscripten
     echo "Building with Emscripten..."

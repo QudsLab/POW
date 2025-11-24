@@ -197,8 +197,7 @@ info:
 
 # Clean build artifacts
 clean:
-	@if exist $(OBJ_DIR) rmdir /s /q $(OBJ_DIR)
-	@if exist $(BIN_DIR) rmdir /s /q $(BIN_DIR)
+	rm -rf $(OBJ_DIR) $(BIN_DIR)
 	@echo Cleaned.
 
 rebuild: clean all

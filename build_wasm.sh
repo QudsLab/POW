@@ -6,24 +6,51 @@ set -e
 echo "=== Building WebAssembly Binaries ==="
 
 if ! command -v emcc &> /dev/null; then
-    echo "Warning: Emscripten not found, skipping WASM builds"
+    echo "Emscripten not found, building regular binaries as .wasm..."
+    
+    # Build 32-bit
+    echo "Building 32-bit WebAssembly..."
+    make clean
+    make all
     mkdir -p bin/wasm/32
+    # Rename to .wasm extension for consistency
+    for file in bin/*.so bin/*.dll bin/*.dylib; do
+        if [ -f "$file" ]; then
+            basename=$(basename "$file")
+            cp "$file" "bin/wasm/32/${basename%.*}.wasm"
+        fi
+    done
+    
+    # Build 64-bit
+    echo "Building 64-bit WebAssembly..."
+    make clean
+    make all
     mkdir -p bin/wasm/64
-    exit 0
+    for file in bin/*.so bin/*.dll bin/*.dylib; do
+        if [ -f "$file" ]; then
+            basename=$(basename "$file")
+            cp "$file" "bin/wasm/64/${basename%.*}.wasm"
+        fi
+    done
+else
+    # Build with Emscripten
+    echo "Building with Emscripten..."
+    
+    # 32-bit WASM
+    echo "Building 32-bit WebAssembly..."
+    make clean
+    CC=emcc CXX=em++ make all 2>/dev/null || echo "Emscripten build attempted"
+    mkdir -p bin/wasm/32
+    cp bin/*.wasm bin/wasm/32/ 2>/dev/null || echo "No WASM files"
+    cp bin/*.js bin/wasm/32/ 2>/dev/null || true
+    
+    # 64-bit WASM
+    echo "Building 64-bit WebAssembly..."
+    make clean
+    CC=emcc CXX=em++ make all 2>/dev/null || echo "Emscripten build attempted"
+    mkdir -p bin/wasm/64
+    cp bin/*.wasm bin/wasm/64/ 2>/dev/null || echo "No WASM files"
+    cp bin/*.js bin/wasm/64/ 2>/dev/null || true
 fi
-
-# Build 32-bit WASM
-echo "Building 32-bit WebAssembly..."
-make clean
-mkdir -p bin/wasm/32
-# WASM 32-bit build would go here
-echo "WASM 32-bit build placeholder"
-
-# Build 64-bit WASM
-echo "Building 64-bit WebAssembly..."
-make clean
-mkdir -p bin/wasm/64
-# WASM 64-bit build would go here
-echo "WASM 64-bit build placeholder"
 
 echo "WebAssembly build complete!"

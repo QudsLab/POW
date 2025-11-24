@@ -1,5 +1,8 @@
 name: Build Multi-Platform Binaries
 
+permissions:
+  contents: write
+
 on:
   push:
     branches: [ main, master, develop ]
@@ -195,60 +198,12 @@ jobs:
           echo "=== versions.json ==="
           cat bin/versions.json
       
-      - name: Upload Complete Artifact Bundle
-        uses: actions/upload-artifact@v4
-        with:
-          name: all-binaries-with-manifest
-          path: bin/
-          retention-days: 365
-
-  create-release:
-    needs: generate-manifest
-    runs-on: ubuntu-latest
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
-    steps:
-      - uses: actions/checkout@v4
-      
-      - name: Download Complete Bundle
-        uses: actions/download-artifact@v4
-        with:
-          name: all-binaries-with-manifest
-          path: bin
-      
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: v${{ env.BUILD_VERSION }}
-          name: POW Release v${{ env.BUILD_VERSION }}
-          body: |
-            ## Multi-Platform Cryptographic Library Build
-            
-            **Build Number**: ${{ env.BUILD_VERSION }}
-            **Commit**: ${{ github.sha }}
-            **Repository**: https://github.com/${{ env.REPO }}
-            
-            ### 📦 Available Platforms
-            
-            - **Windows**: 32-bit & 64-bit DLLs
-            - **Linux**: x86 (32-bit), x64 (64-bit)
-            - **macOS**: Universal 64-bit (Intel & Apple Silicon)
-            - **WebAssembly**: 32-bit & 64-bit modules
-            - **Android**: ARMv7 & ARM64
-            
-            ### 📋 Contents
-            
-            - All platform binaries organized by architecture
-            - `versions.json` - Master manifest with checksums and download links
-            - `BINARY_INFO.md` - Complete documentation
-            
-            ### 🔐 Verification
-            
-            Every binary includes SHA-256 and MD5 checksums in the manifest.
-            
-            See `BINARY_INFO.md` for detailed information about directory structure and usage.
-          files: |
-            bin/**/*
-          draft: false
-          prerelease: false
+      - name: Commit binaries to repository
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          git add bin/
+          git commit -m "Build v${{ env.BUILD_VERSION }} - Auto-generated binaries [skip ci]" || echo "No changes to commit"
+          git push || echo "Nothing to push"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -39,9 +39,7 @@ int main(int argc, char *argv[]) {
             return 1;
         }
     }
-    
     printf("\nServer ready for cross-language integration.\n");
     printf("Compile with your language's FFI/C bindings to use.\n");
-    
     return 0;
 }

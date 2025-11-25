@@ -10,7 +10,7 @@ if ! command -v emcc &> /dev/null; then
     
     # Build once
     echo "Building binaries..."
-    make clean
+    make clean-obj
     make all
     
     # Copy to 32-bit
@@ -48,7 +48,7 @@ else
     
     # 32-bit WASM
     echo "Building 32-bit WebAssembly..."
-    make clean
+    make clean-obj
     CC=emcc CXX=em++ make all 2>/dev/null || echo "Emscripten build attempted"
     mkdir -p bin/wasm/32
     cp bin/*.wasm bin/wasm/32/ 2>/dev/null || echo "No WASM files"
@@ -56,7 +56,7 @@ else
     
     # 64-bit WASM
     echo "Building 64-bit WebAssembly..."
-    make clean
+    make clean-obj
     CC=emcc CXX=em++ make all 2>/dev/null || echo "Emscripten build attempted"
     mkdir -p bin/wasm/64
     cp bin/*.wasm bin/wasm/64/ 2>/dev/null || echo "No WASM files"

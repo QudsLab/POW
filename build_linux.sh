@@ -7,14 +7,14 @@ echo "=== Building Linux Binaries ==="
 
 # Build 64-bit x64
 echo "Building 64-bit Linux libraries..."
-make clean
+make clean-obj
 make all
 mkdir -p bin/linux/64
 cp bin/*.so bin/linux/64/ 2>/dev/null || echo "No 64-bit libraries found"
 
 # Build 32-bit x86
 echo "Building 32-bit Linux libraries..."
-make clean
+make clean-obj
 if command -v gcc-multilib &> /dev/null || dpkg -l | grep -q gcc-multilib; then
     CFLAGS="-w -O2 -std=c99 -fPIC -m32" CXXFLAGS="-w -O2 -std=c++11 -fPIC -m32" make all 2>/dev/null || echo "32-bit build failed"
     mkdir -p bin/linux/32

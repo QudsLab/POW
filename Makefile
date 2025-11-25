@@ -195,10 +195,15 @@ info:
 	@echo "  $(SERVER_DLL)"
 	@echo "  $(CLIENT_DLL)"
 
-# Clean build artifacts
+# Clean only object files (preserve binaries)
+clean-obj:
+	rm -rf $(OBJ_DIR)
+	@echo "Cleaned object files."
+
+# Clean all build artifacts
 clean:
 	rm -rf $(OBJ_DIR) $(BIN_DIR)
-	@echo "Cleaned."
+	@echo "Cleaned all build files."
 
 rebuild: clean all
 
@@ -206,6 +211,7 @@ help:
 	@echo ""
 	@echo "PoW System Build Commands:"
 	@echo "  make all       - Build both server and client DLLs"
+	@echo "  make clean-obj - Remove only object files (preserve binaries)"
 	@echo "  make clean     - Remove all build files"
 	@echo "  make rebuild   - Clean and rebuild"
 	@echo "  make info      - Show build information"

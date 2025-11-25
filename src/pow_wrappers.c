@@ -37,16 +37,54 @@ int pow_solve(pow_type_e pow_type,
              const uint8_t *params, size_t params_len,
              uint8_t *out_solution, size_t *out_solution_len) {
     if (!challenge || !out_solution || !out_solution_len) return -1;
-    *out_solution_len = 0;  // Return empty solution
-    return 0;  // Stub implementation
+    
+    (void)params;  // Unused for now
+    (void)params_len;
+    
+    switch (pow_type) {
+        case POW_BLAKE3:
+            return cb_blake3_solve(challenge, challenge_len, out_solution, out_solution_len);
+        case POW_SHA2:
+            return cb_sha2_solve(challenge, challenge_len, out_solution, out_solution_len);
+        case POW_KECCAK:
+            return cb_keccak_solve(challenge, challenge_len, out_solution, out_solution_len);
+        case POW_SCRYPT:
+            return mb_scrypt_solve(challenge, challenge_len, out_solution, out_solution_len);
+        case POW_ARGON2:
+            return mb_argon_solve(challenge, challenge_len, out_solution, out_solution_len);
+        case POW_ZHASH:
+            return hb_zhash_solve(challenge, challenge_len, out_solution, out_solution_len);
+        default:
+            return -1;  // Invalid algorithm type
+    }
 }
+
 
 int pow_verify(pow_type_e pow_type,
               const uint8_t *challenge, size_t challenge_len,
               const uint8_t *solution, size_t solution_len,
               const uint8_t *params, size_t params_len) {
     if (!challenge || !solution) return -1;
-    return 0;  // Stub implementation - always verify
+    
+    (void)params;  // Unused for now
+    (void)params_len;
+    
+    switch (pow_type) {
+        case POW_BLAKE3:
+            return cb_blake3_verify(challenge, challenge_len, solution, solution_len);
+        case POW_SHA2:
+            return cb_sha2_verify(challenge, challenge_len, solution, solution_len);
+        case POW_KECCAK:
+            return cb_keccak_verify(challenge, challenge_len, solution, solution_len);
+        case POW_SCRYPT:
+            return mb_scrypt_verify(challenge, challenge_len, solution, solution_len);
+        case POW_ARGON2:
+            return mb_argon_verify(challenge, challenge_len, solution, solution_len);
+        case POW_ZHASH:
+            return hb_zhash_verify(challenge, challenge_len, solution, solution_len);
+        default:
+            return -1;  // Invalid algorithm type
+    }
 }
 
 /* Stub implementations for all algorithm solvers and verifiers */

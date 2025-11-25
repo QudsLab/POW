@@ -1,163 +1,131 @@
 {
-  "version": "29",
-  "repository": "qudslab/pow",
-  "release_url": "https://github.com/qudslab/pow/releases/download/vdev",
+  "version": "30",
+  "build_number": "30",
+  "commit_sha": "8a047a2",
+  "timestamp": "2025-11-25T07:06:42.614257Z",
+  "repository": "QudsLab/POW",
+  "branch": "main",
   "platforms": {
     "windows": {
-      "variants": {
-        "32bit": {
-          "binaries": [
-            {
-              "name": "server.dll",
-              "type": ".dll",
-              "size": 180739,
-              "sha256": "c600cf50f90abbe5d4849412df31730a3f64d4aea8c3fb29640da2f8fa12b6e5",
-              "md5": "848f68d4552793853bff80aabde86a3f",
-              "download_url": "https://github.com/qudslab/pow/releases/download/vdev/windows/32/server.dll"
-            },
-            {
-              "name": "client.dll",
-              "type": ".dll",
-              "size": 181587,
-              "sha256": "0dd2fc31756830a9e4a7580b791d32d684f8dd2b4d22d9d2b6ee60a4120eb2c3",
-              "md5": "7e6c7f2cd61a92a7e30f3a300f10c762",
-              "download_url": "https://github.com/qudslab/pow/releases/download/vdev/windows/32/client.dll"
-            }
-          ]
+      "32": {
+        "server": {
+          "url": "https://github.com/QudsLab/POW/raw/refs/heads/main/bin/windows/32/server.dll",
+          "filename": "server.dll",
+          "size": 180739,
+          "sha256": "3a4c00b0f10e9a6f18c2f9e59f521a1e5222e79e4944109bb6fdf78c61bf5511",
+          "path": "bin/windows/32/server.dll"
         },
-        "64bit": {
-          "binaries": [
-            {
-              "name": "server.dll",
-              "type": ".dll",
-              "size": 180739,
-              "sha256": "ba8b2593ec2ead41629fe8b1c4e26b9645d688b8a8c506d06ef0312715fde9b2",
-              "md5": "1772807794dd95b18198949aefb5e855",
-              "download_url": "https://github.com/qudslab/pow/releases/download/vdev/windows/64/server.dll"
-            },
-            {
-              "name": "client.dll",
-              "type": ".dll",
-              "size": 181587,
-              "sha256": "b89aa4fd251a639c8efd3ae928152c6ec29db41a8846d1d4e0f3c6191b4ac58d",
-              "md5": "bcb99fd07842860e4e273f50218f56a8",
-              "download_url": "https://github.com/qudslab/pow/releases/download/vdev/windows/64/client.dll"
-            }
-          ]
+        "client": {
+          "url": "https://github.com/QudsLab/POW/raw/refs/heads/main/bin/windows/32/client.dll",
+          "filename": "client.dll",
+          "size": 181587,
+          "sha256": "545c0f807091d22074ee7efb12368d54d03c4b8baa97466cbf6045fe8c39bb41",
+          "path": "bin/windows/32/client.dll"
+        }
+      },
+      "64": {
+        "server": {
+          "url": "https://github.com/QudsLab/POW/raw/refs/heads/main/bin/windows/64/server.dll",
+          "filename": "server.dll",
+          "size": 180739,
+          "sha256": "fbe43a17900d9398aa57f47c4551014b85c38c45d5a137c9958f691c2643bcad",
+          "path": "bin/windows/64/server.dll"
+        },
+        "client": {
+          "url": "https://github.com/QudsLab/POW/raw/refs/heads/main/bin/windows/64/client.dll",
+          "filename": "client.dll",
+          "size": 181587,
+          "sha256": "bd23fb698096a5f4dfc4195c21be8c16489db287df6d110096f7d1d84a629865",
+          "path": "bin/windows/64/client.dll"
         }
       }
     },
     "linux": {
-      "variants": {
-        "32bit": {
-          "binaries": [
-            {
-              "name": "server.so",
-              "type": ".so",
-              "size": 99480,
-              "sha256": "fa628e808c16d535f53ae1a339aa225a6f9a527dcc086a87988d9cfaf2ed45ba",
-              "md5": "e3df9c7c08c04ce962736a672aad769f",
-              "download_url": "https://github.com/qudslab/pow/releases/download/vdev/linux/32/server.so"
-            },
-            {
-              "name": "client.so",
-              "type": ".so",
-              "size": 99480,
-              "sha256": "a490e86c5a22d3ec58866868866e0b92e2a1bdbc86da5eaa71e68f484fd34917",
-              "md5": "443a8535311618c27e6ac0145c6c1820",
-              "download_url": "https://github.com/qudslab/pow/releases/download/vdev/linux/32/client.so"
-            }
-          ]
+      "32": {
+        "server": {
+          "url": "https://github.com/QudsLab/POW/raw/refs/heads/main/bin/linux/32/server.so",
+          "filename": "server.so",
+          "size": 99480,
+          "sha256": "fa628e808c16d535f53ae1a339aa225a6f9a527dcc086a87988d9cfaf2ed45ba",
+          "path": "bin/linux/32/server.so"
         },
-        "64bit": {
-          "binaries": [
-            {
-              "name": "server.so",
-              "type": ".so",
-              "size": 99480,
-              "sha256": "fa628e808c16d535f53ae1a339aa225a6f9a527dcc086a87988d9cfaf2ed45ba",
-              "md5": "e3df9c7c08c04ce962736a672aad769f",
-              "download_url": "https://github.com/qudslab/pow/releases/download/vdev/linux/64/server.so"
-            },
-            {
-              "name": "client.so",
-              "type": ".so",
-              "size": 99480,
-              "sha256": "a490e86c5a22d3ec58866868866e0b92e2a1bdbc86da5eaa71e68f484fd34917",
-              "md5": "443a8535311618c27e6ac0145c6c1820",
-              "download_url": "https://github.com/qudslab/pow/releases/download/vdev/linux/64/client.so"
-            }
-          ]
+        "client": {
+          "url": "https://github.com/QudsLab/POW/raw/refs/heads/main/bin/linux/32/client.so",
+          "filename": "client.so",
+          "size": 99480,
+          "sha256": "a490e86c5a22d3ec58866868866e0b92e2a1bdbc86da5eaa71e68f484fd34917",
+          "path": "bin/linux/32/client.so"
+        }
+      },
+      "64": {
+        "server": {
+          "url": "https://github.com/QudsLab/POW/raw/refs/heads/main/bin/linux/64/server.so",
+          "filename": "server.so",
+          "size": 99480,
+          "sha256": "fa628e808c16d535f53ae1a339aa225a6f9a527dcc086a87988d9cfaf2ed45ba",
+          "path": "bin/linux/64/server.so"
+        },
+        "client": {
+          "url": "https://github.com/QudsLab/POW/raw/refs/heads/main/bin/linux/64/client.so",
+          "filename": "client.so",
+          "size": 99480,
+          "sha256": "a490e86c5a22d3ec58866868866e0b92e2a1bdbc86da5eaa71e68f484fd34917",
+          "path": "bin/linux/64/client.so"
         }
       }
     },
     "macos": {
-      "variants": {
-        "64bit": {
-          "binaries": [
-            {
-              "name": "client.dylib",
-              "type": ".dylib",
-              "size": 93648,
-              "sha256": "520482f0a9369b0e3298a29c9839283386320bc0b09426c6ccb2599d4d92763e",
-              "md5": "853d8d1a9c2268427f6a8840f7cd5f3b",
-              "download_url": "https://github.com/qudslab/pow/releases/download/vdev/macos/64/client.dylib"
-            },
-            {
-              "name": "server.dylib",
-              "type": ".dylib",
-              "size": 93696,
-              "sha256": "c8b8fd74110c6a36a6518c43e4a858362452cedf49736e815423f77a3cf117e6",
-              "md5": "1fcb95d27dadcaf49e28799ca7b828ac",
-              "download_url": "https://github.com/qudslab/pow/releases/download/vdev/macos/64/server.dylib"
-            }
-          ]
+      "64": {
+        "client": {
+          "url": "https://github.com/QudsLab/POW/raw/refs/heads/main/bin/macos/64/client.dylib",
+          "filename": "client.dylib",
+          "size": 93648,
+          "sha256": "520482f0a9369b0e3298a29c9839283386320bc0b09426c6ccb2599d4d92763e",
+          "path": "bin/macos/64/client.dylib"
+        },
+        "server": {
+          "url": "https://github.com/QudsLab/POW/raw/refs/heads/main/bin/macos/64/server.dylib",
+          "filename": "server.dylib",
+          "size": 93696,
+          "sha256": "c8b8fd74110c6a36a6518c43e4a858362452cedf49736e815423f77a3cf117e6",
+          "path": "bin/macos/64/server.dylib"
         }
       }
     },
     "android": {
-      "variants": {
-        "32bit": {
-          "binaries": [
-            {
-              "name": "server.so",
-              "type": ".so",
-              "size": 99480,
-              "sha256": "fa628e808c16d535f53ae1a339aa225a6f9a527dcc086a87988d9cfaf2ed45ba",
-              "md5": "e3df9c7c08c04ce962736a672aad769f",
-              "download_url": "https://github.com/qudslab/pow/releases/download/vdev/android/32/server.so"
-            },
-            {
-              "name": "client.so",
-              "type": ".so",
-              "size": 99480,
-              "sha256": "a490e86c5a22d3ec58866868866e0b92e2a1bdbc86da5eaa71e68f484fd34917",
-              "md5": "443a8535311618c27e6ac0145c6c1820",
-              "download_url": "https://github.com/qudslab/pow/releases/download/vdev/android/32/client.so"
-            }
-          ]
+      "32": {
+        "server": {
+          "url": "https://github.com/QudsLab/POW/raw/refs/heads/main/bin/android/32/server.so",
+          "filename": "server.so",
+          "size": 99480,
+          "sha256": "fa628e808c16d535f53ae1a339aa225a6f9a527dcc086a87988d9cfaf2ed45ba",
+          "path": "bin/android/32/server.so"
         },
-        "64bit": {
-          "binaries": [
-            {
-              "name": "server.so",
-              "type": ".so",
-              "size": 99480,
-              "sha256": "fa628e808c16d535f53ae1a339aa225a6f9a527dcc086a87988d9cfaf2ed45ba",
-              "md5": "e3df9c7c08c04ce962736a672aad769f",
-              "download_url": "https://github.com/qudslab/pow/releases/download/vdev/android/64/server.so"
-            },
-            {
-              "name": "client.so",
-              "type": ".so",
-              "size": 99480,
-              "sha256": "a490e86c5a22d3ec58866868866e0b92e2a1bdbc86da5eaa71e68f484fd34917",
-              "md5": "443a8535311618c27e6ac0145c6c1820",
-              "download_url": "https://github.com/qudslab/pow/releases/download/vdev/android/64/client.so"
-            }
-          ]
+        "client": {
+          "url": "https://github.com/QudsLab/POW/raw/refs/heads/main/bin/android/32/client.so",
+          "filename": "client.so",
+          "size": 99480,
+          "sha256": "a490e86c5a22d3ec58866868866e0b92e2a1bdbc86da5eaa71e68f484fd34917",
+          "path": "bin/android/32/client.so"
+        }
+      },
+      "64": {
+        "server": {
+          "url": "https://github.com/QudsLab/POW/raw/refs/heads/main/bin/android/64/server.so",
+          "filename": "server.so",
+          "size": 99480,
+          "sha256": "fa628e808c16d535f53ae1a339aa225a6f9a527dcc086a87988d9cfaf2ed45ba",
+          "path": "bin/android/64/server.so"
+        },
+        "client": {
+          "url": "https://github.com/QudsLab/POW/raw/refs/heads/main/bin/android/64/client.so",
+          "filename": "client.so",
+          "size": 99480,
+          "sha256": "a490e86c5a22d3ec58866868866e0b92e2a1bdbc86da5eaa71e68f484fd34917",
+          "path": "bin/android/64/client.so"
         }
       }
     }
-  }
+  },
+  "total_binaries": 14
 }

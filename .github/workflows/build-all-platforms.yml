@@ -335,68 +335,99 @@ jobs:
           ls -laR artifacts/
 
           echo ""
-          echo "=== Organizing binaries ==="
+          echo "=== Creating bin directory structure ==="
           mkdir -p bin/windows/32 bin/windows/64
           mkdir -p bin/linux/32 bin/linux/64
           mkdir -p bin/macos/64
           mkdir -p bin/android/32 bin/android/64
           mkdir -p bin/wasm/32 bin/wasm/64
 
-          # Copy artifacts to bin directory
+          echo ""
+          echo "=== Copying artifacts to bin/ ==="
+          # Copy with verbose output and ignore errors (PQChub pattern)
           if [ -d "artifacts/windows-32" ]; then
-            cp -r artifacts/windows-32/* bin/windows/32/ 2>/dev/null && echo "✅ Copied Windows 32-bit" || echo "⚠️ No Windows 32-bit"
+            cp -rv artifacts/windows-32/* bin/windows/32/ || true
           fi
           if [ -d "artifacts/windows-64" ]; then
-            cp -r artifacts/windows-64/* bin/windows/64/ 2>/dev/null && echo "✅ Copied Windows 64-bit" || echo "⚠️ No Windows 64-bit"
+            cp -rv artifacts/windows-64/* bin/windows/64/ || true
           fi
           if [ -d "artifacts/linux-32" ]; then
-            cp -r artifacts/linux-32/* bin/linux/32/ 2>/dev/null && echo "✅ Copied Linux 32-bit" || echo "⚠️ No Linux 32-bit"
+            cp -rv artifacts/linux-32/* bin/linux/32/ || true
           fi
           if [ -d "artifacts/linux-64" ]; then
-            cp -r artifacts/linux-64/* bin/linux/64/ 2>/dev/null && echo "✅ Copied Linux 64-bit" || echo "⚠️ No Linux 64-bit"
+            cp -rv artifacts/linux-64/* bin/linux/64/ || true
           fi
           if [ -d "artifacts/macos-64" ]; then
-            cp -r artifacts/macos-64/* bin/macos/64/ 2>/dev/null && echo "✅ Copied macOS 64-bit" || echo "⚠️ No macOS 64-bit"
+            cp -rv artifacts/macos-64/* bin/macos/64/ || true
           fi
           if [ -d "artifacts/android-32" ]; then
-            cp -r artifacts/android-32/* bin/android/32/ 2>/dev/null && echo "✅ Copied Android 32-bit" || echo "⚠️ No Android 32-bit"
+            cp -rv artifacts/android-32/* bin/android/32/ || true
           fi
           if [ -d "artifacts/android-64" ]; then
-            cp -r artifacts/android-64/* bin/android/64/ 2>/dev/null && echo "✅ Copied Android 64-bit" || echo "⚠️ No Android 64-bit"
+            cp -rv artifacts/android-64/* bin/android/64/ || true
           fi
           if [ -d "artifacts/wasm-32" ]; then
-            cp -r artifacts/wasm-32/* bin/wasm/32/ 2>/dev/null && echo "✅ Copied WASM 32-bit" || echo "⚠️ No WASM 32-bit"
+            cp -rv artifacts/wasm-32/* bin/wasm/32/ || true
           fi
           if [ -d "artifacts/wasm-64" ]; then
-            cp -r artifacts/wasm-64/* bin/wasm/64/ 2>/dev/null && echo "✅ Copied WASM 64-bit" || echo "⚠️ No WASM 64-bit"
+            cp -rv artifacts/wasm-64/* bin/wasm/64/ || true
           fi
 
           echo ""
           echo "=== Final bin structure ==="
           find bin -type f -ls 2>/dev/null || echo "No binaries found"
 
+          echo ""
+          echo "=== Binary count ==="
+          find bin -type f \( -name "*.dll" -o -name "*.so" -o -name "*.dylib" -o -name "*.wasm" \) 2>/dev/null | wc -l
+
       - name: Generate versions.json
         run: |
           echo "=== Generating versions.json ==="
-          python3 generate_manifest.py bin bin/versions.json
-          cp BINARY_INFO.md bin/BINARY_INFO.md
+          python3 generate_manifest.py bin bin/versions.json || echo "Warning: versions.json generation failed"
+          cp BINARY_INFO.md bin/BINARY_INFO.md || true
 
           echo ""
           echo "=== versions.json content ==="
-          cat bin/versions.json
+          cat bin/versions.json || echo "No versions.json found"
 
-      - name: Commit and Push
+      - name: Configure Git
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
 
+      - name: Commit and push binaries
+        run: |
           git add bin/
 
-          if ! git diff --staged --quiet; then
-            git commit -m "Build v${{ env.BUILD_VERSION }}: Update all binaries [skip ci]"
-            git pull --rebase origin main || git pull --rebase origin master || true
-            git push origin HEAD:main || git push origin HEAD:master || git push
-            echo "✅ Binaries committed successfully"
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
           else
-            echo "⚠️ No changes to commit"
+            # Count binaries
+            binary_count=$(find bin -type f \( -name "*.dll" -o -name "*.so" -o -name "*.dylib" -o -name "*.wasm" \) 2>/dev/null | wc -l)
+            
+            git commit -m "Build v${{ env.BUILD_VERSION }}: Update $binary_count binaries [skip ci]"
+            
+            # Pull latest changes with merge strategy first (PQChub pattern)
+            git pull --no-rebase origin main || git pull --rebase origin main || true
+            
+            # Push with retry logic (PQChub pattern)
+            max_retries=3
+            retry_count=0
+            while [ $retry_count -lt $max_retries ]; do
+              if git push origin main; then
+                echo "✅ Binaries committed and pushed successfully!"
+                break
+              else
+                retry_count=$((retry_count + 1))
+                if [ $retry_count -lt $max_retries ]; then
+                  echo "Push failed, retrying ($retry_count/$max_retries)..."
+                  git pull --rebase origin main
+                  sleep 2
+                else
+                  echo "❌ Failed to push after $max_retries attempts"
+                  exit 1
+                fi
+              fi
+            done
           fi

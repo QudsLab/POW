@@ -1,5 +1,5 @@
 {
-  "version": "17",
+  "version": "18",
   "repository": "qudslab/pow",
   "release_url": "https://github.com/qudslab/pow/releases/download/vdev",
   "platforms": {
@@ -11,16 +11,16 @@
               "name": "server.dll",
               "type": ".dll",
               "size": 180739,
-              "sha256": "a679e22b35d0cfd1b77e0026c5858351d287c68db589022045d5cf1181f954c5",
-              "md5": "612f0ee65be22b78d47d7fcedf506488",
+              "sha256": "ae579ce24e5dc3de34d0b7e86fb7605dc9f9d6a4da16ae999300fa8f2a9b08f3",
+              "md5": "47e389362bb8cad3e1a8af327b406738",
               "download_url": "https://github.com/qudslab/pow/releases/download/vdev/windows/32/server.dll"
             },
             {
               "name": "client.dll",
               "type": ".dll",
               "size": 181587,
-              "sha256": "54e5dc65ca529f4770a60068d35c3943fdb895cfaba6061cb8e18603665f1543",
-              "md5": "d7e4772d2424e15f63d812e3b4c2204c",
+              "sha256": "bbd0506999ceec4277b4c3a1014adc31017fae1741f437affbc8c12d77a150be",
+              "md5": "a35e21d6b16963584f8d9791e1d7e887",
               "download_url": "https://github.com/qudslab/pow/releases/download/vdev/windows/32/client.dll"
             }
           ]
@@ -31,16 +31,16 @@
               "name": "server.dll",
               "type": ".dll",
               "size": 180739,
-              "sha256": "a90b42fad8ee64f3d4e6a352df1af393de7334f2a9b7207494d44081bafe7c58",
-              "md5": "40f9fdd5eb223aad16bf0cfaaf032462",
+              "sha256": "6058aac74481063261d6d0189a314fb97fee69e77dceb14b21d250ebb6d39598",
+              "md5": "ed3ea488b43c01c30fd3ba28c7f9c08f",
               "download_url": "https://github.com/qudslab/pow/releases/download/vdev/windows/64/server.dll"
             },
             {
               "name": "client.dll",
               "type": ".dll",
               "size": 181587,
-              "sha256": "e58d70cb126bd415ea7d6c7ce190bac4a2e0891c81037f8e41c021a53a9cc354",
-              "md5": "239a11cbba34beddb10abb85f3c4f8d0",
+              "sha256": "158dd8841ea46c00a7ecb501c96d42e1edb2f89b3f8aeb20cf7a3b4bbde43b15",
+              "md5": "97b7582c9d90618cef31f711b00c82ac",
               "download_url": "https://github.com/qudslab/pow/releases/download/vdev/windows/64/client.dll"
             }
           ]

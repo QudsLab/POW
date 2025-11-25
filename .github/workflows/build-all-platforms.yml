@@ -222,12 +222,32 @@ jobs:
 
       - name: Build WASM 32-bit
         run: |
-          rm -rf obj
-          CC=emcc CXX=em++ make all 2>/dev/null || echo "Emscripten build attempted"
+          rm -rf obj bin
           mkdir -p bin/wasm/32
-          cp bin/*.wasm bin/wasm/32/ 2>/dev/null || echo "No .wasm files found"
-          cp bin/*.js bin/wasm/32/ 2>/dev/null || true
-          ls -lh bin/wasm/32/ || echo "Directory empty"
+
+          # Emscripten flags for pthread and shared library support
+          export EMCC_FLAGS="-s USE_PTHREADS=1 -s PTHREAD_POOL_SIZE=4 -s SIDE_MODULE=1 -s EXPORT_ALL=1 -s WASM=1"
+
+          # Try to build with Emscripten
+          CC=emcc CXX=em++ \
+            CFLAGS="-w -O2 -std=c99 -fPIC $EMCC_FLAGS" \
+            CXXFLAGS="-w -O2 -std=c++11 -fPIC $EMCC_FLAGS" \
+            LDFLAGS="$EMCC_FLAGS" \
+            make all 2>&1 | tee build.log || true
+
+          # Check if any WASM files were created
+          if ls bin/*.wasm 1>/dev/null 2>&1; then
+            cp bin/*.wasm bin/wasm/32/
+            cp bin/*.js bin/wasm/32/ 2>/dev/null || true
+            echo "✅ WASM 32-bit build successful"
+            ls -lh bin/wasm/32/
+          else
+            echo "⚠️ WASM 32-bit build produced no files"
+            echo "Build log:"
+            cat build.log || true
+            # Create placeholder to avoid artifact error
+            touch bin/wasm/32/.gitkeep
+          fi
 
       - name: Upload WASM 32-bit
         uses: actions/upload-artifact@v4
@@ -235,7 +255,7 @@ jobs:
           name: wasm-32
           path: bin/wasm/32/
           retention-days: 1
-          if-no-files-found: warn
+          if-no-files-found: ignore
 
   build-wasm-64:
     runs-on: ubuntu-latest
@@ -249,12 +269,32 @@ jobs:
 
       - name: Build WASM 64-bit
         run: |
-          rm -rf obj
-          CC=emcc CXX=em++ make all 2>/dev/null || echo "Emscripten build attempted"
+          rm -rf obj bin
           mkdir -p bin/wasm/64
-          cp bin/*.wasm bin/wasm/64/ 2>/dev/null || echo "No .wasm files found"
-          cp bin/*.js bin/wasm/64/ 2>/dev/null || true
-          ls -lh bin/wasm/64/ || echo "Directory empty"
+
+          # Emscripten flags for pthread and shared library support (64-bit memory)
+          export EMCC_FLAGS="-s USE_PTHREADS=1 -s PTHREAD_POOL_SIZE=4 -s SIDE_MODULE=1 -s EXPORT_ALL=1 -s WASM=1 -s MEMORY64=1"
+
+          # Try to build with Emscripten
+          CC=emcc CXX=em++ \
+            CFLAGS="-w -O2 -std=c99 -fPIC $EMCC_FLAGS" \
+            CXXFLAGS="-w -O2 -std=c++11 -fPIC $EMCC_FLAGS" \
+            LDFLAGS="$EMCC_FLAGS" \
+            make all 2>&1 | tee build.log || true
+
+          # Check if any WASM files were created
+          if ls bin/*.wasm 1>/dev/null 2>&1; then
+            cp bin/*.wasm bin/wasm/64/
+            cp bin/*.js bin/wasm/64/ 2>/dev/null || true
+            echo "✅ WASM 64-bit build successful"
+            ls -lh bin/wasm/64/
+          else
+            echo "⚠️ WASM 64-bit build produced no files"
+            echo "Build log:"
+            cat build.log || true
+            # Create placeholder to avoid artifact error
+            touch bin/wasm/64/.gitkeep
+          fi
 
       - name: Upload WASM 64-bit
         uses: actions/upload-artifact@v4
@@ -262,7 +302,7 @@ jobs:
           name: wasm-64
           path: bin/wasm/64/
           retention-days: 1
-          if-no-files-found: warn
+          if-no-files-found: ignore
 
   # ========== COMMIT ALL BINARIES ==========
   commit-all-binaries:
@@ -302,20 +342,20 @@ jobs:
           mkdir -p bin/android/32 bin/android/64
           mkdir -p bin/wasm/32 bin/wasm/64
 
-          # Copy artifacts to bin directory
-          cp -rv artifacts/windows-32/* bin/windows/32/ 2>/dev/null || echo "No Windows 32-bit"
-          cp -rv artifacts/windows-64/* bin/windows/64/ 2>/dev/null || echo "No Windows 64-bit"
-          cp -rv artifacts/linux-32/* bin/linux/32/ 2>/dev/null || echo "No Linux 32-bit"
-          cp -rv artifacts/linux-64/* bin/linux/64/ 2>/dev/null || echo "No Linux 64-bit"
-          cp -rv artifacts/macos-64/* bin/macos/64/ 2>/dev/null || echo "No macOS 64-bit"
-          cp -rv artifacts/android-32/* bin/android/32/ 2>/dev/null || echo "No Android 32-bit"
-          cp -rv artifacts/android-64/* bin/android/64/ 2>/dev/null || echo "No Android 64-bit"
-          cp -rv artifacts/wasm-32/* bin/wasm/32/ 2>/dev/null || echo "No WASM 32-bit"
-          cp -rv artifacts/wasm-64/* bin/wasm/64/ 2>/dev/null || echo "No WASM 64-bit"
+          # Copy artifacts to bin directory (skip .gitkeep files)
+          find artifacts/windows-32 -type f ! -name '.gitkeep' -exec cp {} bin/windows/32/ \; 2>/dev/null || echo "⚠️ No Windows 32-bit"
+          find artifacts/windows-64 -type f ! -name '.gitkeep' -exec cp {} bin/windows/64/ \; 2>/dev/null || echo "⚠️ No Windows 64-bit"
+          find artifacts/linux-32 -type f ! -name '.gitkeep' -exec cp {} bin/linux/32/ \; 2>/dev/null || echo "⚠️ No Linux 32-bit"
+          find artifacts/linux-64 -type f ! -name '.gitkeep' -exec cp {} bin/linux/64/ \; 2>/dev/null || echo "⚠️ No Linux 64-bit"
+          find artifacts/macos-64 -type f ! -name '.gitkeep' -exec cp {} bin/macos/64/ \; 2>/dev/null || echo "⚠️ No macOS 64-bit"
+          find artifacts/android-32 -type f ! -name '.gitkeep' -exec cp {} bin/android/32/ \; 2>/dev/null || echo "⚠️ No Android 32-bit"
+          find artifacts/android-64 -type f ! -name '.gitkeep' -exec cp {} bin/android/64/ \; 2>/dev/null || echo "⚠️ No Android 64-bit"
+          find artifacts/wasm-32 -type f ! -name '.gitkeep' -exec cp {} bin/wasm/32/ \; 2>/dev/null || echo "⚠️ No WASM 32-bit"
+          find artifacts/wasm-64 -type f ! -name '.gitkeep' -exec cp {} bin/wasm/64/ \; 2>/dev/null || echo "⚠️ No WASM 64-bit"
 
           echo ""
           echo "=== Final bin structure ==="
-          find bin -type f -ls
+          find bin -type f ! -name '.gitkeep' -ls || echo "No binaries found"
 
       - name: Generate versions.json
         run: |

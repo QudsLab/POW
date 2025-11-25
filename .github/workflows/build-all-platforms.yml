@@ -5,18 +5,18 @@ permissions:
 
 on:
   push:
-    branches: [ main, master, develop ]
+    branches: [main, master, develop]
     paths:
-      - 'src/**'
-      - 'Makefile'
-      - 'build_*.sh'
-      - 'generate_manifest.py'
-      - '.github/workflows/**'
+      - "src/**"
+      - "Makefile"
+      - "build_*.sh"
+      - "generate_manifest.py"
+      - ".github/workflows/**"
   pull_request:
-    branches: [ main, master ]
+    branches: [main, master]
   workflow_dispatch:
   schedule:
-    - cron: '0 0 * * 0'  # Weekly build every Sunday
+    - cron: "0 0 * * 0" # Weekly build every Sunday
 
 env:
   BUILD_VERSION: ${{ github.run_number }}
@@ -28,7 +28,7 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Setup MSYS2
         uses: msys2/setup-msys2@v2
         with:
@@ -38,13 +38,13 @@ jobs:
             mingw-w64-ucrt-x86_64-gcc
             mingw-w64-ucrt-x86_64-make
             make
-      
+
       - name: Build Windows Binaries
         shell: msys2 {0}
         run: |
           chmod +x build_windows.sh
           bash build_windows.sh
-      
+
       - name: Upload Windows Artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -56,17 +56,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Install Dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y build-essential gcc-multilib g++-multilib
-      
+
       - name: Build Linux Binaries
         run: |
           chmod +x build_linux.sh
           bash build_linux.sh
-      
+
       - name: Upload Linux Artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -78,12 +78,12 @@ jobs:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Build macOS Binaries
         run: |
           chmod +x build_macos.sh
           bash build_macos.sh
-      
+
       - name: Upload macOS Artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -95,17 +95,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Setup Android NDK
         uses: nttld/setup-ndk@v1
         with:
           ndk-version: r26b
-      
+
       - name: Build Android Binaries
         run: |
           chmod +x build_android.sh
           bash build_android.sh
-      
+
       - name: Upload Android Artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -117,17 +117,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Setup Emscripten
         uses: mymindstorm/setup-emsdk@v14
         with:
           version: latest
-      
+
       - name: Build WebAssembly Binaries
         run: |
           chmod +x build_wasm.sh
           bash build_wasm.sh
-      
+
       - name: Upload WASM Artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -142,68 +142,108 @@ jobs:
       - uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-      
+
       - name: Download All Artifacts
         uses: actions/download-artifact@v4
         with:
           path: downloaded-artifacts
-      
+
       - name: Organize binaries
         run: |
-          echo "Downloaded artifacts:"
+          echo "=== Downloaded artifacts structure ==="
           ls -laR downloaded-artifacts/
-          
+
+          # Clean and recreate bin directory
+          rm -rf bin
           mkdir -p bin
-          
+
           # Artifacts are downloaded as: downloaded-artifacts/{platform}-binaries/{32|64}/files
           # We need: bin/{platform}/{32|64}/files
-          
+          # The build scripts already create the correct structure, so we just need to copy it
+
           if [ -d "downloaded-artifacts/windows-binaries" ]; then
+            echo "=== Processing Windows binaries ==="
             mkdir -p bin/windows
             cp -rv downloaded-artifacts/windows-binaries/* bin/windows/
           fi
-          
+
           if [ -d "downloaded-artifacts/linux-binaries" ]; then
+            echo "=== Processing Linux binaries ==="
             mkdir -p bin/linux
             cp -rv downloaded-artifacts/linux-binaries/* bin/linux/
           fi
-          
+
           if [ -d "downloaded-artifacts/macos-binaries" ]; then
+            echo "=== Processing macOS binaries ==="
             mkdir -p bin/macos
             cp -rv downloaded-artifacts/macos-binaries/* bin/macos/
           fi
-          
+
           if [ -d "downloaded-artifacts/android-binaries" ]; then
+            echo "=== Processing Android binaries ==="
             mkdir -p bin/android
             cp -rv downloaded-artifacts/android-binaries/* bin/android/
           fi
-          
+
           if [ -d "downloaded-artifacts/wasm-binaries" ]; then
+            echo "=== Processing WASM binaries ==="
             mkdir -p bin/wasm
             cp -rv downloaded-artifacts/wasm-binaries/* bin/wasm/
           fi
-          
-          echo "Final bin structure:"
-          find bin -type f -ls
-      
+
+          echo ""
+          echo "=== Final bin directory structure ==="
+          tree bin/ || find bin -type f -exec ls -lh {} \;
+
+          echo ""
+          echo "=== Verifying expected structure ==="
+          # Verify the structure matches expectations
+          for platform in windows linux macos android wasm; do
+            if [ -d "bin/$platform" ]; then
+              echo "Platform: $platform"
+              for arch in 32 64; do
+                if [ -d "bin/$platform/$arch" ]; then
+                  echo "  ✓ bin/$platform/$arch/ exists"
+                  ls -lh "bin/$platform/$arch/" || true
+                else
+                  echo "  ✗ bin/$platform/$arch/ missing"
+                fi
+              done
+            fi
+          done
+
       - name: Generate versions.json
         run: |
+          echo "=== Generating versions.json ==="
           python3 generate_manifest.py bin bin/versions.json
           cp BINARY_INFO.md bin/BINARY_INFO.md
+          echo ""
+          echo "=== versions.json content ==="
           cat bin/versions.json
-      
+
       - name: Configure Git
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-      
+
       - name: Commit and push
         run: |
+          echo "=== Staging changes ==="
           git add bin/
+
+          echo ""
+          echo "=== Git status ==="
+          git status
+
           if git diff --staged --quiet; then
-            echo "No changes"
+            echo "No changes to commit"
           else
+            echo "=== Committing changes ==="
             git commit -m "Build v${{ env.BUILD_VERSION }}: Update binaries [skip ci]"
-            git pull --no-rebase origin main || true
-            git push origin main || git push
+            
+            echo "=== Pulling latest changes ==="
+            git pull --rebase origin main || git pull --rebase origin master || true
+            
+            echo "=== Pushing to repository ==="
+            git push origin HEAD:main || git push origin HEAD:master || git push
           fi

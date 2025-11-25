@@ -44,7 +44,7 @@ jobs:
             mingw-w64-ucrt-x86_64-python
             make
 
-      - name: Build Windows binaries
+      - name: Build Windows binaries (32-bit and 64-bit)
         shell: msys2 {0}
         run: |
           python3 builder.py all
@@ -72,7 +72,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y build-essential gcc-multilib g++-multilib
 
-      - name: Build Linux binaries
+      - name: Build Linux binaries (32-bit and 64-bit)
         run: |
           python3 builder.py all
 
@@ -94,7 +94,7 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Build macOS binaries
+      - name: Build macOS binaries (64-bit only)
         run: |
           python3 builder.py all
 
@@ -121,10 +121,9 @@ jobs:
         with:
           ndk-version: r26b
 
-      - name: Build Android binaries
+      - name: Build Android binaries (32-bit and 64-bit)
         run: |
-          python3 builder.py android-32
-          python3 builder.py android-64
+          python3 builder.py all
 
       - name: Upload Android binaries
         uses: actions/upload-artifact@v4
@@ -133,39 +132,10 @@ jobs:
           path: bin/android/
           retention-days: 1
 
-  # ========== WASM BUILDS ==========
-  build-wasm:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: "3.11"
-
-      - name: Setup Emscripten
-        uses: mymindstorm/setup-emsdk@v14
-        with:
-          version: latest
-
-      - name: Build WASM binaries
-        run: |
-          python3 builder.py wasm-32
-          python3 builder.py wasm-64
-
-      - name: Upload WASM binaries
-        uses: actions/upload-artifact@v4
-        with:
-          name: wasm-binaries
-          path: bin/wasm/
-          retention-days: 1
-          if-no-files-found: ignore
-
   # ========== COMMIT ALL BINARIES ==========
   commit-binaries:
     runs-on: ubuntu-latest
-    needs: [build-windows, build-linux, build-macos, build-android, build-wasm]
+    needs: [build-windows, build-linux, build-macos, build-android]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -225,7 +195,7 @@ jobs:
             echo "No changes to commit"
           else
             # Count binaries
-            binary_count=$(find bin -type f \( -name "*.dll" -o -name "*.so" -o -name "*.dylib" -o -name "*.wasm" \) 2>/dev/null | wc -l)
+            binary_count=$(find bin -type f \( -name "*.dll" -o -name "*.so" -o -name "*.dylib" \) 2>/dev/null | wc -l)
             
             git commit -m "Build v${{ env.BUILD_VERSION }}: Update $binary_count binaries [skip ci]"
             
@@ -236,7 +206,7 @@ jobs:
             retry_count=0
             while [ $retry_count -lt $max_retries ]; do
               if git push origin main; then
-                echo "✅ Binaries committed successfully!"
+                echo "[OK] Binaries committed successfully!"
                 break
               else
                 retry_count=$((retry_count + 1))
@@ -245,7 +215,7 @@ jobs:
                   git pull --rebase origin main
                   sleep 2
                 else
-                  echo "❌ Failed after $max_retries attempts"
+                  echo "[ERROR] Failed after $max_retries attempts"
                   exit 1
                 fi
               fi

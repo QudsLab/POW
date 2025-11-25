@@ -91,7 +91,7 @@ struct Solution {
 struct SolverSolutions {
  u32 edge_bits;
  u32 num_sols;
- Solution sols[MAX_SOLS];
+ struct Solution sols[MAX_SOLS];
 };
 
 #define MAX_NAME_LEN 256
@@ -175,12 +175,13 @@ const char *errstr[] = { "OK", "wrong header length", "edge too big", "edges not
 //   return sipnode(keys, edge, uorv) << 1 | uorv;
 // }
 
-u64 timestamp() {
-        using namespace std::chrono;
-        high_resolution_clock::time_point now = high_resolution_clock::now();
-        auto dn = now.time_since_epoch();
-        return dn.count();
-}
+// C++ timestamp function - comment out for C build
+// u64 timestamp() {
+//         using namespace std::chrono;
+//         high_resolution_clock::time_point now = high_resolution_clock::now();
+//         auto dn = now.time_since_epoch();
+//         return dn.count();
+// }
 
 /////////////////////////////////////////////////////////////////
 // Declarations to make it easier for callers to link as required

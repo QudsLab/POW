@@ -328,61 +328,6 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           path: artifacts
-
-      - name: Organize Binaries
-        run: |
-          echo "=== Downloaded artifacts ==="
-          ls -laR artifacts/
-
-          echo ""
-          echo "=== Creating bin directory structure ==="
-          mkdir -p bin/windows/32 bin/windows/64
-          mkdir -p bin/linux/32 bin/linux/64
-          mkdir -p bin/macos/64
-          mkdir -p bin/android/32 bin/android/64
-          mkdir -p bin/wasm/32 bin/wasm/64
-
-          echo ""
-          echo "=== Copying artifacts to bin/ ==="
-          # Copy with verbose output and ignore errors (PQChub pattern)
-          if [ -d "artifacts/windows-32" ]; then
-            cp -rv artifacts/windows-32/* bin/windows/32/ || true
-          fi
-          if [ -d "artifacts/windows-64" ]; then
-            cp -rv artifacts/windows-64/* bin/windows/64/ || true
-          fi
-          if [ -d "artifacts/linux-32" ]; then
-            cp -rv artifacts/linux-32/* bin/linux/32/ || true
-          fi
-          if [ -d "artifacts/linux-64" ]; then
-            cp -rv artifacts/linux-64/* bin/linux/64/ || true
-          fi
-          if [ -d "artifacts/macos-64" ]; then
-            cp -rv artifacts/macos-64/* bin/macos/64/ || true
-          fi
-          if [ -d "artifacts/android-32" ]; then
-            cp -rv artifacts/android-32/* bin/android/32/ || true
-          fi
-          if [ -d "artifacts/android-64" ]; then
-            cp -rv artifacts/android-64/* bin/android/64/ || true
-          fi
-          if [ -d "artifacts/wasm-32" ]; then
-            cp -rv artifacts/wasm-32/* bin/wasm/32/ || true
-          fi
-          if [ -d "artifacts/wasm-64" ]; then
-            cp -rv artifacts/wasm-64/* bin/wasm/64/ || true
-          fi
-
-          echo ""
-          echo "=== Final bin structure ==="
-          find bin -type f -ls 2>/dev/null || echo "No binaries found"
-
-          echo ""
-          echo "=== Binary count ==="
-          find bin -type f \( -name "*.dll" -o -name "*.so" -o -name "*.dylib" -o -name "*.wasm" \) 2>/dev/null | wc -l
-
-      - name: Generate versions.json
-        run: |
           echo "=== Generating versions.json ==="
           python3 generate_manifest.py bin bin/versions.json || echo "Warning: versions.json generation failed"
           cp BINARY_INFO.md bin/BINARY_INFO.md || true

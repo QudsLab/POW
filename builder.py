@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Universal Builder for POW - Cross-Platform Binary Builder
-Builds binaries for Windows, Linux, macOS, Android, and WASM
+Builds binaries for Windows, Linux, macOS, and Android (32-bit and 64-bit)
 """
 
 import os
@@ -24,7 +24,7 @@ class POWBuilder:
         """Clean object files only"""
         if self.obj_dir.exists():
             shutil.rmtree(self.obj_dir)
-            print(f"✓ Cleaned {self.obj_dir}")
+            print(f"[OK] Cleaned {self.obj_dir}")
     
     def clean_all(self):
         """Clean all build artifacts"""
@@ -32,7 +32,7 @@ class POWBuilder:
             shutil.rmtree(self.obj_dir)
         if self.bin_dir.exists():
             shutil.rmtree(self.bin_dir)
-        print("✓ Cleaned all build artifacts")
+        print("[OK] Cleaned all build artifacts")
     
     def run_make(self, env=None, capture_output=False):
         """Run make with optional environment variables"""
@@ -46,7 +46,7 @@ class POWBuilder:
             )
             return result.returncode == 0
         except Exception as e:
-            print(f"✗ Make failed: {e}")
+            print(f"[ERROR] Make failed: {e}")
             return False
     
     def copy_binaries(self, pattern, dest_dir):
@@ -77,10 +77,10 @@ class POWBuilder:
         
         if self.run_make(env):
             copied = self.copy_binaries("*.dll", "windows/32")
-            print(f"✓ Windows 32-bit: {copied} binaries")
+            print(f"[OK] Windows 32-bit: {copied} binaries")
             return True
         else:
-            print("⚠ Windows 32-bit build failed (may not be supported)")
+            print("[WARN] Windows 32-bit build failed (may not be supported)")
             return False
     
     def build_windows_64(self):
@@ -90,10 +90,10 @@ class POWBuilder:
         
         if self.run_make():
             copied = self.copy_binaries("*.dll", "windows/64")
-            print(f"✓ Windows 64-bit: {copied} binaries")
+            print(f"[OK] Windows 64-bit: {copied} binaries")
             return True
         else:
-            print("✗ Windows 64-bit build failed")
+            print("[ERROR] Windows 64-bit build failed")
             return False
     
     def build_linux_32(self):
@@ -108,10 +108,10 @@ class POWBuilder:
         
         if self.run_make(env):
             copied = self.copy_binaries("*.so", "linux/32")
-            print(f"✓ Linux 32-bit: {copied} binaries")
+            print(f"[OK] Linux 32-bit: {copied} binaries")
             return True
         else:
-            print("⚠ Linux 32-bit build failed (may need gcc-multilib)")
+            print("[WARN] Linux 32-bit build failed (may need gcc-multilib)")
             return False
     
     def build_linux_64(self):
@@ -121,23 +121,23 @@ class POWBuilder:
         
         if self.run_make():
             copied = self.copy_binaries("*.so", "linux/64")
-            print(f"✓ Linux 64-bit: {copied} binaries")
+            print(f"[OK] Linux 64-bit: {copied} binaries")
             return True
         else:
-            print("✗ Linux 64-bit build failed")
+            print("[ERROR] Linux 64-bit build failed")
             return False
     
     def build_macos_64(self):
-        """Build macOS 64-bit binaries (only 64-bit supported)"""
+        """Build macOS 64-bit binaries"""
         print("\n=== Building macOS 64-bit ===")
         self.clean_obj()
         
         if self.run_make():
             copied = self.copy_binaries("*.dylib", "macos/64")
-            print(f"✓ macOS 64-bit: {copied} binaries")
+            print(f"[OK] macOS 64-bit: {copied} binaries")
             return True
         else:
-            print("✗ macOS 64-bit build failed")
+            print("[ERROR] macOS 64-bit build failed")
             return False
     
     def build_android_32(self):
@@ -152,10 +152,10 @@ class POWBuilder:
         
         if self.run_make(env):
             copied = self.copy_binaries("*.so", "android/32")
-            print(f"✓ Android 32-bit: {copied} binaries")
+            print(f"[OK] Android 32-bit: {copied} binaries")
             return True
         else:
-            print("⚠ Android 32-bit build failed")
+            print("[WARN] Android 32-bit build failed")
             return False
     
     def build_android_64(self):
@@ -165,83 +165,11 @@ class POWBuilder:
         
         if self.run_make():
             copied = self.copy_binaries("*.so", "android/64")
-            print(f"✓ Android 64-bit: {copied} binaries")
+            print(f"[OK] Android 64-bit: {copied} binaries")
             return True
         else:
-            print("✗ Android 64-bit build failed")
+            print("[ERROR] Android 64-bit build failed")
             return False
-    
-    def build_wasm_32(self):
-        """Build WebAssembly 32-bit binaries"""
-        print("\n=== Building WASM 32-bit ===")
-        
-        # Check if emscripten is available
-        if not shutil.which("emcc"):
-            print("⚠ Emscripten not found, skipping WASM build")
-            return False
-        
-        self.clean_obj()
-        if self.bin_dir.exists():
-            shutil.rmtree(self.bin_dir)
-        
-        env = {
-            "CC": "emcc",
-            "CXX": "em++",
-            "CFLAGS": "-w -O2 -std=c99 -fPIC -s USE_PTHREADS=1 -s PTHREAD_POOL_SIZE=4 -s SIDE_MODULE=1 -s EXPORT_ALL=1 -s WASM=1",
-            "CXXFLAGS": "-w -O2 -std=c++11 -fPIC -s USE_PTHREADS=1 -s PTHREAD_POOL_SIZE=4 -s SIDE_MODULE=1 -s EXPORT_ALL=1 -s WASM=1",
-            "LDFLAGS": "-s USE_PTHREADS=1 -s PTHREAD_POOL_SIZE=4 -s SIDE_MODULE=1 -s EXPORT_ALL=1 -s WASM=1"
-        }
-        
-        if self.run_make(env, capture_output=True):
-            copied_wasm = self.copy_binaries("*.wasm", "wasm/32")
-            copied_js = self.copy_binaries("*.js", "wasm/32")
-            if copied_wasm > 0:
-                print(f"✓ WASM 32-bit: {copied_wasm} wasm, {copied_js} js files")
-            else:
-                print("⚠ WASM 32-bit: Build succeeded but no files (pthread not supported)")
-        else:
-            print("⚠ WASM 32-bit: Build failed (pthread not fully supported)")
-        
-        # Create placeholder directory
-        (self.bin_dir / "wasm/32").mkdir(parents=True, exist_ok=True)
-        # Don't fail - WASM is experimental
-        return True
-    
-    def build_wasm_64(self):
-        """Build WebAssembly 64-bit binaries"""
-        print("\n=== Building WASM 64-bit ===")
-        
-        # Check if emscripten is available
-        if not shutil.which("emcc"):
-            print("⚠ Emscripten not found, skipping WASM build")
-            return False
-        
-        self.clean_obj()
-        if self.bin_dir.exists():
-            shutil.rmtree(self.bin_dir)
-        
-        env = {
-            "CC": "emcc",
-            "CXX": "em++",
-            "CFLAGS": "-w -O2 -std=c99 -fPIC -s USE_PTHREADS=1 -s PTHREAD_POOL_SIZE=4 -s SIDE_MODULE=1 -s EXPORT_ALL=1 -s WASM=1 -s MEMORY64=1",
-            "CXXFLAGS": "-w -O2 -std=c++11 -fPIC -s USE_PTHREADS=1 -s PTHREAD_POOL_SIZE=4 -s SIDE_MODULE=1 -s EXPORT_ALL=1 -s WASM=1 -s MEMORY64=1",
-            "LDFLAGS": "-s USE_PTHREADS=1 -s PTHREAD_POOL_SIZE=4 -s SIDE_MODULE=1 -s EXPORT_ALL=1 -s WASM=1 -s MEMORY64=1"
-        }
-        
-        if self.run_make(env, capture_output=True):
-            copied_wasm = self.copy_binaries("*.wasm", "wasm/64")
-            copied_js = self.copy_binaries("*.js", "wasm/64")
-            if copied_wasm > 0:
-                print(f"✓ WASM 64-bit: {copied_wasm} wasm, {copied_js} js files")
-            else:
-                print("⚠ WASM 64-bit: Build succeeded but no files (pthread not supported)")
-        else:
-            print("⚠ WASM 64-bit: Build failed (pthread not fully supported)")
-        
-        # Create placeholder directory
-        (self.bin_dir / "wasm/64").mkdir(parents=True, exist_ok=True)
-        # Don't fail - WASM is experimental
-        return True
     
     def build_all(self):
         """Build all supported platforms"""
@@ -260,8 +188,6 @@ class POWBuilder:
             results["Linux 64-bit"] = self.build_linux_64()
             results["Android 32-bit"] = self.build_android_32()
             results["Android 64-bit"] = self.build_android_64()
-            results["WASM 32-bit"] = self.build_wasm_32()
-            results["WASM 64-bit"] = self.build_wasm_64()
         elif self.host_os == "darwin":
             results["macOS 64-bit"] = self.build_macos_64()
         
@@ -270,7 +196,7 @@ class POWBuilder:
         print("Build Summary:")
         print("=" * 60)
         for platform, success in results.items():
-            status = "✓" if success else "✗"
+            status = "[OK]" if success else "[FAIL]"
             print(f"{status} {platform}")
         
         # List all binaries
@@ -279,7 +205,7 @@ class POWBuilder:
         print("=" * 60)
         total = 0
         for file in sorted(self.bin_dir.rglob("*")):
-            if file.is_file() and file.suffix in [".dll", ".so", ".dylib", ".wasm", ".js"]:
+            if file.is_file() and file.suffix in [".dll", ".so", ".dylib"]:
                 rel_path = file.relative_to(self.bin_dir)
                 size = file.stat().st_size
                 print(f"  {rel_path} ({size:,} bytes)")
@@ -293,9 +219,9 @@ def main():
     parser = argparse.ArgumentParser(description="POW Universal Builder")
     parser.add_argument("target", nargs="?", default="all",
                        choices=["all", "windows-32", "windows-64", 
-                               "linux-32", "linux-64", "macos-64",
-                               "android-32", "android-64",
-                               "wasm-32", "wasm-64", "clean"],
+                               "linux-32", "linux-64", 
+                               "macos-64",
+                               "android-32", "android-64", "clean"],
                        help="Build target (default: all)")
     
     args = parser.parse_args()
@@ -315,8 +241,6 @@ def main():
         "macos-64": builder.build_macos_64,
         "android-32": builder.build_android_32,
         "android-64": builder.build_android_64,
-        "wasm-32": builder.build_wasm_32,
-        "wasm-64": builder.build_wasm_64,
     }
     
     success = target_map[args.target]()

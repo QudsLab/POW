@@ -242,10 +242,14 @@ jobs:
           echo "=== Generating versions.json ==="
           
           if [ -f "generate_manifest.py" ]; then
-            python3 generate_manifest.py bin bin/versions.json || echo "Warning: versions.json generation failed"
+            # Pass repository info to the script
+            python3 generate_manifest.py bin bin/versions.json "${{ github.repository }}" "${{ github.ref_name }}" || {
+              echo "Error: versions.json generation failed"
+              exit 1
+            }
           else
-            echo "Warning: generate_manifest.py not found, creating basic versions.json"
-            echo '{"version": "'${{ env.BUILD_VERSION }}'", "timestamp": "'$(date -u +"%Y-%m-%dT%H:%M:%SZ")'"}' > bin/versions.json
+            echo "Error: generate_manifest.py not found!"
+            exit 1
           fi
           
           if [ -f "BINARY_INFO.md" ]; then
@@ -254,7 +258,11 @@ jobs:
 
           echo ""
           echo "=== versions.json content ==="
-          cat bin/versions.json 2>/dev/null || echo "No versions.json created"
+          cat bin/versions.json | head -50
+          
+          echo ""
+          echo "=== Sample download URLs ==="
+          cat bin/versions.json | grep -o '"url": "[^"]*"' | head -5
 
       - name: Verify binaries before commit
         run: |
@@ -299,7 +307,7 @@ jobs:
           
           echo ""
           echo "=== Creating commit ==="
-          git commit -m "Build v${{ env.BUILD_VERSION }}: Update $binary_count binaries [skip ci]"
+          git commit -m "🚀 Build v${{ env.BUILD_VERSION }}: Update $binary_count binaries [skip ci]"
           
           echo ""
           echo "=== Pushing to repository ==="
@@ -309,7 +317,7 @@ jobs:
           while [ $retry_count -lt $max_retries ]; do
             if git push origin HEAD:${{ github.ref_name }}; then
               echo ""
-              echo "Binaries committed and pushed successfully!"
+              echo "✅ Binaries committed and pushed successfully!"
               exit 0
             else
               retry_count=$((retry_count + 1))
@@ -325,7 +333,7 @@ jobs:
                 sleep $((retry_count * 2))
               else
                 echo ""
-                echo "Failed to push after $max_retries attempts"
+                echo "❌ Failed to push after $max_retries attempts"
                 exit 1
               fi
             fi
@@ -336,11 +344,11 @@ jobs:
         run: |
           binary_count=$(find bin -type f \( -name "*.dll" -o -name "*.so" -o -name "*.dylib" \) 2>/dev/null | wc -l)
           
-          echo "## Build Summary" >> $GITHUB_STEP_SUMMARY
+          echo "## 🎉 Build Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "- **Build Version:** ${{ env.BUILD_VERSION }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Total Binaries:** $binary_count" >> $GITHUB_STEP_SUMMARY
-          echo "- **Commit Status:** Successfully committed and pushed" >> $GITHUB_STEP_SUMMARY
+          echo "- **Commit Status:** ✅ Successfully committed and pushed" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Platform Breakdown" >> $GITHUB_STEP_SUMMARY
           echo "- Windows: $(find bin/windows -type f 2>/dev/null | wc -l) files" >> $GITHUB_STEP_SUMMARY

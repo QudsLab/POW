@@ -5,6 +5,7 @@
 #include <string.h> // for functions strlen, memset
 #include <stdarg.h>
 #include <stdio.h>
+#include <stdbool.h> // for bool type in C
 // Only include chrono for C++
 #ifdef __cplusplus
 #include <chrono>

@@ -71,12 +71,38 @@ int pow_verify(pow_type_e pow_type,
 int cb_blake3_solve(const uint8_t *challenge, size_t challenge_len,
                    uint8_t *out_solution, size_t *out_solution_len) {
     if (!challenge || !out_solution || !out_solution_len) return -1;
-    // Use pow_brute_force_hash with BLAKE3
-    size_t nonce_len = 8; // 8 bytes nonce
+    
+    size_t nonce_len = 8;
     *out_solution_len = nonce_len;
-    uint32_t difficulty = 1; // TODO: pass real difficulty
-    uint64_t max_iterations = 1000000;
-    return pow_brute_force_hash(challenge, challenge_len, difficulty, max_iterations, out_solution, out_solution_len);
+    uint32_t difficulty = 1; // 1 leading zero bit
+    uint64_t max_iterations = 100000;
+    
+    // Brute-force search for valid nonce
+    uint8_t nonce[8] = {0};
+    uint8_t hash[32];
+    
+    for (uint64_t iter = 0; iter < max_iterations; iter++) {
+        // Compute hash
+        blake3_hasher hasher;
+        blake3_hasher_init(&hasher);
+        blake3_hasher_update(&hasher, challenge, challenge_len);
+        blake3_hasher_update(&hasher, nonce, nonce_len);
+        blake3_hasher_finalize(&hasher, hash, 32);
+        
+        // Check if meets difficulty
+        if (pow_verify_hash_difficulty(hash, 32, difficulty)) {
+            memcpy(out_solution, nonce, nonce_len);
+            return 0; // Success
+        }
+        
+        // Increment nonce
+        for (size_t i = 0; i < nonce_len; i++) {
+            nonce[i]++;
+            if (nonce[i] != 0) break;
+        }
+    }
+    
+    return -1; // No valid nonce found
 }
 
 int cb_blake3_verify(const uint8_t *challenge, size_t challenge_len,
@@ -104,11 +130,38 @@ int cb_blake3_verify(const uint8_t *challenge, size_t challenge_len,
 int cb_sha2_solve(const uint8_t *challenge, size_t challenge_len,
                  uint8_t *out_solution, size_t *out_solution_len) {
     if (!challenge || !out_solution || !out_solution_len) return -1;
+    
     size_t nonce_len = 8;
     *out_solution_len = nonce_len;
     uint32_t difficulty = 1;
-    uint64_t max_iterations = 1000000;
-    return pow_brute_force_hash(challenge, challenge_len, difficulty, max_iterations, out_solution, out_solution_len);
+    uint64_t max_iterations = 100000;
+    
+    // Brute-force search for valid nonce
+    uint8_t nonce[8] = {0};
+    uint8_t hash[32];
+    
+    for (uint64_t iter = 0; iter < max_iterations; iter++) {
+        // Compute hash
+        sha256_ctx ctx;
+        sha256_init(&ctx);
+        sha256_update(&ctx, challenge, challenge_len);
+        sha256_update(&ctx, nonce, nonce_len);
+        sha256_final(&ctx, hash);
+        
+        // Check if meets difficulty
+        if (pow_verify_hash_difficulty(hash, 32, difficulty)) {
+            memcpy(out_solution, nonce, nonce_len);
+            return 0; // Success
+        }
+        
+        // Increment nonce
+        for (size_t i = 0; i < nonce_len; i++) {
+            nonce[i]++;
+            if (nonce[i] != 0) break;
+        }
+    }
+    
+    return -1; // No valid nonce found
 }
 
 int cb_sha2_verify(const uint8_t *challenge, size_t challenge_len,
@@ -136,11 +189,41 @@ int cb_sha2_verify(const uint8_t *challenge, size_t challenge_len,
 int cb_keccak_solve(const uint8_t *challenge, size_t challenge_len,
                    uint8_t *out_solution, size_t *out_solution_len) {
     if (!challenge || !out_solution || !out_solution_len) return -1;
+    
     size_t nonce_len = 8;
     *out_solution_len = nonce_len;
     uint32_t difficulty = 1;
-    uint64_t max_iterations = 1000000;
-    return pow_brute_force_hash(challenge, challenge_len, difficulty, max_iterations, out_solution, out_solution_len);
+    uint64_t max_iterations = 100000;
+    
+    // Brute-force search for valid nonce
+    uint8_t nonce[8] = {0};
+    uint8_t hash[32];
+    
+    for (uint64_t iter = 0; iter < max_iterations; iter++) {
+        // Compute hash
+        size_t total_len = challenge_len + nonce_len;
+        uint8_t *input = (uint8_t*)malloc(total_len);
+        if (!input) return -1;
+        
+        memcpy(input, challenge, challenge_len);
+        memcpy(input + challenge_len, nonce, nonce_len);
+        sha3_256(input, (int)total_len, hash);
+        free(input);
+        
+        // Check if meets difficulty
+        if (pow_verify_hash_difficulty(hash, 32, difficulty)) {
+            memcpy(out_solution, nonce, nonce_len);
+            return 0; // Success
+        }
+        
+        // Increment nonce
+        for (size_t i = 0; i < nonce_len; i++) {
+            nonce[i]++;
+            if (nonce[i] != 0) break;
+        }
+    }
+    
+    return -1; // No valid nonce found
 }
 
 int cb_keccak_verify(const uint8_t *challenge, size_t challenge_len,
@@ -171,11 +254,44 @@ int cb_keccak_verify(const uint8_t *challenge, size_t challenge_len,
 int mb_scrypt_solve(const uint8_t *challenge, size_t challenge_len,
                    uint8_t *out_solution, size_t *out_solution_len) {
     if (!challenge || !out_solution || !out_solution_len) return -1;
+    
     size_t nonce_len = 8;
     *out_solution_len = nonce_len;
     uint32_t difficulty = 1;
-    uint64_t max_iterations = 1000000;
-    return pow_brute_force_hash(challenge, challenge_len, difficulty, max_iterations, out_solution, out_solution_len);
+    uint64_t max_iterations = 10000; // Lower for slow Scrypt
+    
+    // Brute-force search for valid nonce
+    uint8_t nonce[8] = {0};
+    uint8_t hash[32];
+    
+    for (uint64_t iter = 0; iter < max_iterations; iter++) {
+        // Compute hash
+        size_t total_len = challenge_len + nonce_len;
+        uint8_t *input = (uint8_t*)malloc(total_len);
+        if (!input) return -1;
+        
+        memcpy(input, challenge, challenge_len);
+        memcpy(input + challenge_len, nonce, nonce_len);
+        
+        int result = scrypt(input, total_len, input, total_len, 1024, 8, 1, hash, 32);
+        free(input);
+        
+        if (result != 0) continue;
+        
+        // Check if meets difficulty
+        if (pow_verify_hash_difficulty(hash, 32, difficulty)) {
+            memcpy(out_solution, nonce, nonce_len);
+            return 0; // Success
+        }
+        
+        // Increment nonce
+        for (size_t i = 0; i < nonce_len; i++) {
+            nonce[i]++;
+            if (nonce[i] != 0) break;
+        }
+    }
+    
+    return -1; // No valid nonce found
 }
 
 int mb_scrypt_verify(const uint8_t *challenge, size_t challenge_len,
@@ -210,11 +326,59 @@ int mb_scrypt_verify(const uint8_t *challenge, size_t challenge_len,
 int mb_argon_solve(const uint8_t *challenge, size_t challenge_len,
                   uint8_t *out_solution, size_t *out_solution_len) {
     if (!challenge || !out_solution || !out_solution_len) return -1;
+    
     size_t nonce_len = 8;
     *out_solution_len = nonce_len;
     uint32_t difficulty = 1;
-    uint64_t max_iterations = 1000000;
-    return pow_brute_force_hash(challenge, challenge_len, difficulty, max_iterations, out_solution, out_solution_len);
+    uint64_t max_iterations = 5000; // Lower for slow Argon2
+    
+    // Brute-force search for valid nonce
+    uint8_t nonce[8] = {0};
+    uint8_t hash[32];
+    
+    for (uint64_t iter = 0; iter < max_iterations; iter++) {
+        // Compute hash
+        size_t total_len = challenge_len + nonce_len;
+        uint8_t *input = (uint8_t*)malloc(total_len);
+        if (!input) return -1;
+        
+        memcpy(input, challenge, challenge_len);
+        memcpy(input + challenge_len, nonce, nonce_len);
+        
+        argon2_context ctx;
+        memset(&ctx, 0, sizeof(ctx));
+        ctx.out = hash;
+        ctx.outlen = 32;
+        ctx.pwd = input;
+        ctx.pwdlen = (uint32_t)total_len;
+        ctx.salt = input;
+        ctx.saltlen = (uint32_t)total_len;
+        ctx.t_cost = 2;
+        ctx.m_cost = 4096;
+        ctx.lanes = 1;
+        ctx.threads = 1;
+        ctx.version = ARGON2_VERSION_NUMBER;
+        ctx.flags = ARGON2_DEFAULT_FLAGS;
+        
+        int result = argon2_ctx(&ctx, Argon2_id);
+        free(input);
+        
+        if (result != ARGON2_OK) continue;
+        
+        // Check if meets difficulty
+        if (pow_verify_hash_difficulty(hash, 32, difficulty)) {
+            memcpy(out_solution, nonce, nonce_len);
+            return 0; // Success
+        }
+        
+        // Increment nonce
+        for (size_t i = 0; i < nonce_len; i++) {
+            nonce[i]++;
+            if (nonce[i] != 0) break;
+        }
+    }
+    
+    return -1; // No valid nonce found
 }
 
 int mb_argon_verify(const uint8_t *challenge, size_t challenge_len,
@@ -264,11 +428,45 @@ int mb_argon_verify(const uint8_t *challenge, size_t challenge_len,
 int hb_zhash_solve(const uint8_t *challenge, size_t challenge_len,
                   uint8_t *out_solution, size_t *out_solution_len) {
     if (!challenge || !out_solution || !out_solution_len) return -1;
+    
     size_t nonce_len = 8;
     *out_solution_len = nonce_len;
     uint32_t difficulty = 1;
-    uint64_t max_iterations = 1000000;
-    return pow_brute_force_hash(challenge, challenge_len, difficulty, max_iterations, out_solution, out_solution_len);
+    uint64_t max_iterations = 100000;
+    
+    // Brute-force search for valid nonce using BLAKE3
+    uint8_t nonce[8] = {0};
+    uint8_t hash[32];
+    
+    for (uint64_t iter = 0; iter < max_iterations; iter++) {
+        // Compute hash
+        size_t total_len = challenge_len + nonce_len;
+        uint8_t *input = (uint8_t*)malloc(total_len);
+        if (!input) return -1;
+        
+        memcpy(input, challenge, challenge_len);
+        memcpy(input + challenge_len, nonce, nonce_len);
+        
+        blake3_hasher hasher;
+        blake3_hasher_init(&hasher);
+        blake3_hasher_update(&hasher, input, total_len);
+        blake3_hasher_finalize(&hasher, hash, 32);
+        free(input);
+        
+        // Check if meets difficulty
+        if (pow_verify_hash_difficulty(hash, 32, difficulty)) {
+            memcpy(out_solution, nonce, nonce_len);
+            return 0; // Success
+        }
+        
+        // Increment nonce
+        for (size_t i = 0; i < nonce_len; i++) {
+            nonce[i]++;
+            if (nonce[i] != 0) break;
+        }
+    }
+    
+    return -1; // No valid nonce found
 }
 
 int hb_zhash_verify(const uint8_t *challenge, size_t challenge_len,

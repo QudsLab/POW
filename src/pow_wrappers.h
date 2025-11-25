@@ -17,12 +17,6 @@ typedef enum {
     POW_SCRYPT = 3,
     POW_ARGON2 = 4,
     POW_ZHASH = 5,
-    POW_CUCKOO = 6,
-    POW_CUCKAROO = 7,
-    POW_CUCKAROOD = 8,
-    POW_CUCKAROOM = 9,
-    POW_CUCKAROOZ = 10,
-    POW_CUCKATOO = 11,
     POW_INVALID = -1
 } pow_type_e;
 

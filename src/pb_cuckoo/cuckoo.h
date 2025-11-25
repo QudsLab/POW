@@ -14,7 +14,7 @@
 #include <ctime>
 #endif
 #include "../crypto/blake2.h"
-#include "../crypto/siphash.hpp"
+#include "../crypto/siphash.h" // Use C version, not C++
 
 #ifdef SIPHASH_COMPAT
 #include <stdio.h>
@@ -56,41 +56,41 @@ typedef uint16_t word_t;
 
 // Common Solver parameters, to return to caller
 struct SolverParams {
-        u32 nthreads = 0;
-        u32 ntrims = 0;
+        u32 nthreads;
+        u32 ntrims;
         bool showcycle;
         bool allrounds;
-        bool mutate_nonce = 1;
-        bool cpuload = 1;
+        bool mutate_nonce;
+        bool cpuload;
 
         // Common cuda params
-        u32 device = 0;
+        u32 device;
 
         // Cuda-lean specific params
-        u32 blocks = 0;
-        u32 tpb = 0;
+        u32 blocks;
+        u32 tpb;
 
         // Cuda-mean specific params
-        u32 expand = 0;
-        u32 genablocks = 0;
-        u32 genatpb = 0;
-        u32 genbtpb = 0;
-        u32 trimtpb = 0;
-        u32 tailtpb = 0;
-        u32 recoverblocks = 0;
-        u32 recovertpb = 0;
+        u32 expand;
+        u32 genablocks;
+        u32 genatpb;
+        u32 genbtpb;
+        u32 trimtpb;
+        u32 tailtpb;
+        u32 recoverblocks;
+        u32 recovertpb;
 };
 
 // Solutions result structs to be instantiated by caller,
 // and filled by solver if desired
 struct Solution {
- u64 nonce = 0;
+ u64 nonce;
  u64 proof[PROOFSIZE];
 };
 
 struct SolverSolutions {
- u32 edge_bits = 0;
- u32 num_sols = 0;
+ u32 edge_bits;
+ u32 num_sols;
  Solution sols[MAX_SOLS];
 };
 
@@ -103,16 +103,16 @@ char LAST_ERROR_REASON[MAX_NAME_LEN];
 // Solver statistics, to be instantiated by caller
 // and filled by solver if desired
 struct SolverStats {
-        u32 device_id = 0;
-        u32 edge_bits = 0;
+        u32 device_id;
+        u32 edge_bits;
         char plugin_name[MAX_NAME_LEN]; // will be filled in caller-side
         char device_name[MAX_NAME_LEN];
-        bool has_errored = false;
+        bool has_errored;
         char error_reason[MAX_NAME_LEN];
-        u32 iterations = 0;
-        u64 last_start_time = 0;
-        u64 last_end_time = 0;
-        u64 last_solution_time = 0;
+        u32 iterations;
+        u64 last_start_time;
+        u64 last_end_time;
+        u64 last_solution_time;
 };
 
 // generate edge endpoint in cuckoo graph without partition bit

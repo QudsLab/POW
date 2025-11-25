@@ -160,13 +160,28 @@ jobs:
           echo "=== Organizing binaries ==="
           mkdir -p bin
 
-          # Copy all artifacts to bin/
-          for artifact_dir in artifacts/*; do
-            if [ -d "$artifact_dir" ]; then
-              echo "Processing $(basename $artifact_dir)"
-              cp -rv "$artifact_dir"/* bin/ 2>/dev/null || true
-            fi
-          done
+          # Copy platform directories preserving structure
+          # artifacts/windows-binaries/windows/ -> bin/windows/
+          # artifacts/linux-binaries/linux/ -> bin/linux/
+          if [ -d "artifacts/windows-binaries/windows" ]; then
+            echo "Copying Windows binaries..."
+            cp -rv artifacts/windows-binaries/windows bin/
+          fi
+
+          if [ -d "artifacts/linux-binaries/linux" ]; then
+            echo "Copying Linux binaries..."
+            cp -rv artifacts/linux-binaries/linux bin/
+          fi
+
+          if [ -d "artifacts/macos-binaries/macos" ]; then
+            echo "Copying macOS binaries..."
+            cp -rv artifacts/macos-binaries/macos bin/
+          fi
+
+          if [ -d "artifacts/android-binaries/android" ]; then
+            echo "Copying Android binaries..."
+            cp -rv artifacts/android-binaries/android bin/
+          fi
 
           echo ""
           echo "=== Final bin structure ==="

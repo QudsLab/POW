@@ -32,6 +32,21 @@ pow_type_e pow_type_from_name(const char *name) {
     return POW_INVALID;
 }
 
+// Forward declarations for algorithm-specific functions
+int cb_blake3_solve(const uint8_t *challenge, size_t challenge_len, uint8_t *out_solution, size_t *out_solution_len);
+int cb_blake3_verify(const uint8_t *challenge, size_t challenge_len, const uint8_t *solution, size_t solution_len);
+int cb_sha2_solve(const uint8_t *challenge, size_t challenge_len, uint8_t *out_solution, size_t *out_solution_len);
+int cb_sha2_verify(const uint8_t *challenge, size_t challenge_len, const uint8_t *solution, size_t solution_len);
+int cb_keccak_solve(const uint8_t *challenge, size_t challenge_len, uint8_t *out_solution, size_t *out_solution_len);
+int cb_keccak_verify(const uint8_t *challenge, size_t challenge_len, const uint8_t *solution, size_t solution_len);
+int mb_scrypt_solve(const uint8_t *challenge, size_t challenge_len, uint8_t *out_solution, size_t *out_solution_len);
+int mb_scrypt_verify(const uint8_t *challenge, size_t challenge_len, const uint8_t *solution, size_t solution_len);
+int mb_argon_solve(const uint8_t *challenge, size_t challenge_len, uint8_t *out_solution, size_t *out_solution_len);
+int mb_argon_verify(const uint8_t *challenge, size_t challenge_len, const uint8_t *solution, size_t solution_len);
+int hb_zhash_solve(const uint8_t *challenge, size_t challenge_len, uint8_t *out_solution, size_t *out_solution_len);
+int hb_zhash_verify(const uint8_t *challenge, size_t challenge_len, const uint8_t *solution, size_t solution_len);
+
+
 int pow_solve(pow_type_e pow_type,
              const uint8_t *challenge, size_t challenge_len,
              const uint8_t *params, size_t params_len,

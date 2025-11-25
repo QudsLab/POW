@@ -23,13 +23,11 @@ env:
   REPO: qudslab/pow
 
 jobs:
-  # Windows 32-bit
+  # ========== WINDOWS BUILDS (PARALLEL) ==========
   build-windows-32:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup MSYS2
         uses: msys2/setup-msys2@v2
@@ -44,32 +42,23 @@ jobs:
       - name: Build Windows 32-bit
         shell: msys2 {0}
         run: |
-          make clean-obj
+          rm -rf obj
           CFLAGS="-w -O2 -std=c99 -fPIC -m32" CXXFLAGS="-w -O2 -std=c++11 -fPIC -m32" make all 2>/dev/null || echo "32-bit build attempted"
           mkdir -p bin/windows/32
           cp bin/*.dll bin/windows/32/ 2>/dev/null || echo "No DLLs found"
           ls -lh bin/windows/32/
 
-      - name: Commit Windows 32-bit
-        shell: msys2 {0}
-        run: |
-          git config --local user.email "github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "github-actions[bot]"
-          git add bin/windows/32/
-          if ! git diff --staged --quiet; then
-            git commit -m "Build v${{ env.BUILD_VERSION }}: Windows 32-bit binaries [skip ci]"
-            git pull --rebase origin main || git pull --rebase origin master || true
-            git push origin HEAD:main || git push origin HEAD:master || git push
-          fi
+      - name: Upload Windows 32-bit
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-32
+          path: bin/windows/32/
+          retention-days: 1
 
-  # Windows 64-bit
   build-windows-64:
     runs-on: windows-latest
-    needs: build-windows-32
     steps:
       - uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup MSYS2
         uses: msys2/setup-msys2@v2
@@ -84,32 +73,24 @@ jobs:
       - name: Build Windows 64-bit
         shell: msys2 {0}
         run: |
-          make clean-obj
+          rm -rf obj
           make all
           mkdir -p bin/windows/64
           cp bin/*.dll bin/windows/64/ 2>/dev/null || echo "No DLLs found"
           ls -lh bin/windows/64/
 
-      - name: Commit Windows 64-bit
-        shell: msys2 {0}
-        run: |
-          git config --local user.email "github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "github-actions[bot]"
-          git add bin/windows/64/
-          if ! git diff --staged --quiet; then
-            git commit -m "Build v${{ env.BUILD_VERSION }}: Windows 64-bit binaries [skip ci]"
-            git pull --rebase origin main || git pull --rebase origin master || true
-            git push origin HEAD:main || git push origin HEAD:master || git push
-          fi
+      - name: Upload Windows 64-bit
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-64
+          path: bin/windows/64/
+          retention-days: 1
 
-  # Linux 32-bit
+  # ========== LINUX BUILDS (PARALLEL) ==========
   build-linux-32:
     runs-on: ubuntu-latest
-    needs: build-windows-64
     steps:
       - uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install Dependencies
         run: |
@@ -118,31 +99,23 @@ jobs:
 
       - name: Build Linux 32-bit
         run: |
-          make clean-obj
+          rm -rf obj
           CFLAGS="-w -O2 -std=c99 -fPIC -m32" CXXFLAGS="-w -O2 -std=c++11 -fPIC -m32" make all 2>/dev/null || echo "32-bit build attempted"
           mkdir -p bin/linux/32
           cp bin/*.so bin/linux/32/ 2>/dev/null || echo "No .so files found"
           ls -lh bin/linux/32/
 
-      - name: Commit Linux 32-bit
-        run: |
-          git config --local user.email "github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "github-actions[bot]"
-          git add bin/linux/32/
-          if ! git diff --staged --quiet; then
-            git commit -m "Build v${{ env.BUILD_VERSION }}: Linux 32-bit binaries [skip ci]"
-            git pull --rebase origin main || git pull --rebase origin master || true
-            git push origin HEAD:main || git push origin HEAD:master || git push
-          fi
+      - name: Upload Linux 32-bit
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-32
+          path: bin/linux/32/
+          retention-days: 1
 
-  # Linux 64-bit
   build-linux-64:
     runs-on: ubuntu-latest
-    needs: build-linux-32
     steps:
       - uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install Dependencies
         run: |
@@ -151,59 +124,45 @@ jobs:
 
       - name: Build Linux 64-bit
         run: |
-          make clean-obj
+          rm -rf obj
           make all
           mkdir -p bin/linux/64
           cp bin/*.so bin/linux/64/ 2>/dev/null || echo "No .so files found"
           ls -lh bin/linux/64/
 
-      - name: Commit Linux 64-bit
-        run: |
-          git config --local user.email "github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "github-actions[bot]"
-          git add bin/linux/64/
-          if ! git diff --staged --quiet; then
-            git commit -m "Build v${{ env.BUILD_VERSION }}: Linux 64-bit binaries [skip ci]"
-            git pull --rebase origin main || git pull --rebase origin master || true
-            git push origin HEAD:main || git push origin HEAD:master || git push
-          fi
+      - name: Upload Linux 64-bit
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-64
+          path: bin/linux/64/
+          retention-days: 1
 
-  # macOS 64-bit
+  # ========== MACOS BUILD ==========
   build-macos-64:
     runs-on: macos-latest
-    needs: build-linux-64
     steps:
       - uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build macOS 64-bit
         run: |
-          make clean-obj
+          rm -rf obj
           make all
           mkdir -p bin/macos/64
           cp bin/*.dylib bin/macos/64/ 2>/dev/null || echo "No .dylib files found"
           ls -lh bin/macos/64/
 
-      - name: Commit macOS 64-bit
-        run: |
-          git config --local user.email "github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "github-actions[bot]"
-          git add bin/macos/64/
-          if ! git diff --staged --quiet; then
-            git commit -m "Build v${{ env.BUILD_VERSION }}: macOS 64-bit binaries [skip ci]"
-            git pull --rebase origin main || git pull --rebase origin master || true
-            git push origin HEAD:main || git push origin HEAD:master || git push
-          fi
+      - name: Upload macOS 64-bit
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-64
+          path: bin/macos/64/
+          retention-days: 1
 
-  # Android 32-bit
+  # ========== ANDROID BUILDS (PARALLEL) ==========
   build-android-32:
     runs-on: ubuntu-latest
-    needs: build-macos-64
     steps:
       - uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Android NDK
         uses: nttld/setup-ndk@v1
@@ -212,31 +171,23 @@ jobs:
 
       - name: Build Android 32-bit
         run: |
-          make clean-obj
+          rm -rf obj
           CFLAGS="-w -O2 -std=c99 -fPIC -m32" CXXFLAGS="-w -O2 -std=c++11 -fPIC -m32" make all 2>/dev/null || echo "32-bit build attempted"
           mkdir -p bin/android/32
           cp bin/*.so bin/android/32/ 2>/dev/null || echo "No .so files found"
           ls -lh bin/android/32/
 
-      - name: Commit Android 32-bit
-        run: |
-          git config --local user.email "github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "github-actions[bot]"
-          git add bin/android/32/
-          if ! git diff --staged --quiet; then
-            git commit -m "Build v${{ env.BUILD_VERSION }}: Android 32-bit binaries [skip ci]"
-            git pull --rebase origin main || git pull --rebase origin master || true
-            git push origin HEAD:main || git push origin HEAD:master || git push
-          fi
+      - name: Upload Android 32-bit
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-32
+          path: bin/android/32/
+          retention-days: 1
 
-  # Android 64-bit
   build-android-64:
     runs-on: ubuntu-latest
-    needs: build-android-32
     steps:
       - uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Android NDK
         uses: nttld/setup-ndk@v1
@@ -245,31 +196,24 @@ jobs:
 
       - name: Build Android 64-bit
         run: |
-          make clean-obj
+          rm -rf obj
           make all
           mkdir -p bin/android/64
           cp bin/*.so bin/android/64/ 2>/dev/null || echo "No .so files found"
           ls -lh bin/android/64/
 
-      - name: Commit Android 64-bit
-        run: |
-          git config --local user.email "github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "github-actions[bot]"
-          git add bin/android/64/
-          if ! git diff --staged --quiet; then
-            git commit -m "Build v${{ env.BUILD_VERSION }}: Android 64-bit binaries [skip ci]"
-            git pull --rebase origin main || git pull --rebase origin master || true
-            git push origin HEAD:main || git push origin HEAD:master || git push
-          fi
+      - name: Upload Android 64-bit
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-64
+          path: bin/android/64/
+          retention-days: 1
 
-  # WASM 32-bit
+  # ========== WASM BUILDS (PARALLEL) ==========
   build-wasm-32:
     runs-on: ubuntu-latest
-    needs: build-android-64
     steps:
       - uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Emscripten
         uses: mymindstorm/setup-emsdk@v14
@@ -278,32 +222,25 @@ jobs:
 
       - name: Build WASM 32-bit
         run: |
-          make clean-obj
+          rm -rf obj
           CC=emcc CXX=em++ make all 2>/dev/null || echo "Emscripten build attempted"
           mkdir -p bin/wasm/32
           cp bin/*.wasm bin/wasm/32/ 2>/dev/null || echo "No .wasm files found"
           cp bin/*.js bin/wasm/32/ 2>/dev/null || true
           ls -lh bin/wasm/32/ || echo "Directory empty"
 
-      - name: Commit WASM 32-bit
-        run: |
-          git config --local user.email "github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "github-actions[bot]"
-          git add bin/wasm/32/
-          if ! git diff --staged --quiet; then
-            git commit -m "Build v${{ env.BUILD_VERSION }}: WASM 32-bit binaries [skip ci]"
-            git pull --rebase origin main || git pull --rebase origin master || true
-            git push origin HEAD:main || git push origin HEAD:master || git push
-          fi
+      - name: Upload WASM 32-bit
+        uses: actions/upload-artifact@v4
+        with:
+          name: wasm-32
+          path: bin/wasm/32/
+          retention-days: 1
+          if-no-files-found: warn
 
-  # WASM 64-bit
   build-wasm-64:
     runs-on: ubuntu-latest
-    needs: build-wasm-32
     steps:
       - uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Emscripten
         uses: mymindstorm/setup-emsdk@v14
@@ -312,39 +249,76 @@ jobs:
 
       - name: Build WASM 64-bit
         run: |
-          make clean-obj
+          rm -rf obj
           CC=emcc CXX=em++ make all 2>/dev/null || echo "Emscripten build attempted"
           mkdir -p bin/wasm/64
           cp bin/*.wasm bin/wasm/64/ 2>/dev/null || echo "No .wasm files found"
           cp bin/*.js bin/wasm/64/ 2>/dev/null || true
           ls -lh bin/wasm/64/ || echo "Directory empty"
 
-      - name: Commit WASM 64-bit
-        run: |
-          git config --local user.email "github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "github-actions[bot]"
-          git add bin/wasm/64/
-          if ! git diff --staged --quiet; then
-            git commit -m "Build v${{ env.BUILD_VERSION }}: WASM 64-bit binaries [skip ci]"
-            git pull --rebase origin main || git pull --rebase origin master || true
-            git push origin HEAD:main || git push origin HEAD:master || git push
-          fi
+      - name: Upload WASM 64-bit
+        uses: actions/upload-artifact@v4
+        with:
+          name: wasm-64
+          path: bin/wasm/64/
+          retention-days: 1
+          if-no-files-found: warn
 
-  # Generate versions.json
-  generate-manifest:
+  # ========== COMMIT ALL BINARIES ==========
+  commit-all-binaries:
     runs-on: ubuntu-latest
-    needs: build-wasm-64
+    needs:
+      [
+        build-windows-32,
+        build-windows-64,
+        build-linux-32,
+        build-linux-64,
+        build-macos-64,
+        build-android-32,
+        build-android-64,
+        build-wasm-32,
+        build-wasm-64,
+      ]
     steps:
       - uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Generate versions.json
+      - name: Download All Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Organize Binaries
         run: |
-          echo "=== Current bin structure ==="
-          find bin -type f -ls || echo "No binaries found"
+          echo "=== Downloaded artifacts ==="
+          ls -laR artifacts/
 
           echo ""
+          echo "=== Organizing binaries ==="
+          mkdir -p bin/windows/32 bin/windows/64
+          mkdir -p bin/linux/32 bin/linux/64
+          mkdir -p bin/macos/64
+          mkdir -p bin/android/32 bin/android/64
+          mkdir -p bin/wasm/32 bin/wasm/64
+
+          # Copy artifacts to bin directory
+          cp -rv artifacts/windows-32/* bin/windows/32/ 2>/dev/null || echo "No Windows 32-bit"
+          cp -rv artifacts/windows-64/* bin/windows/64/ 2>/dev/null || echo "No Windows 64-bit"
+          cp -rv artifacts/linux-32/* bin/linux/32/ 2>/dev/null || echo "No Linux 32-bit"
+          cp -rv artifacts/linux-64/* bin/linux/64/ 2>/dev/null || echo "No Linux 64-bit"
+          cp -rv artifacts/macos-64/* bin/macos/64/ 2>/dev/null || echo "No macOS 64-bit"
+          cp -rv artifacts/android-32/* bin/android/32/ 2>/dev/null || echo "No Android 32-bit"
+          cp -rv artifacts/android-64/* bin/android/64/ 2>/dev/null || echo "No Android 64-bit"
+          cp -rv artifacts/wasm-32/* bin/wasm/32/ 2>/dev/null || echo "No WASM 32-bit"
+          cp -rv artifacts/wasm-64/* bin/wasm/64/ 2>/dev/null || echo "No WASM 64-bit"
+
+          echo ""
+          echo "=== Final bin structure ==="
+          find bin -type f -ls
+
+      - name: Generate versions.json
+        run: |
           echo "=== Generating versions.json ==="
           python3 generate_manifest.py bin bin/versions.json
           cp BINARY_INFO.md bin/BINARY_INFO.md
@@ -353,13 +327,18 @@ jobs:
           echo "=== versions.json content ==="
           cat bin/versions.json
 
-      - name: Commit versions.json
+      - name: Commit and Push
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          git add bin/versions.json bin/BINARY_INFO.md
+
+          git add bin/
+
           if ! git diff --staged --quiet; then
-            git commit -m "Build v${{ env.BUILD_VERSION }}: Update versions.json [skip ci]"
+            git commit -m "Build v${{ env.BUILD_VERSION }}: Update all binaries [skip ci]"
             git pull --rebase origin main || git pull --rebase origin master || true
             git push origin HEAD:main || git push origin HEAD:master || git push
+            echo "✅ Binaries committed successfully"
+          else
+            echo "⚠️ No changes to commit"
           fi

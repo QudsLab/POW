@@ -248,6 +248,8 @@ int cb_keccak_solve(const uint8_t *challenge, size_t challenge_len,
         
         memcpy(input, challenge, challenge_len);
         memcpy(input + challenge_len, nonce, nonce_len);
+        /* Ensure hash buffer is clean before hashing */
+        memset(hash, 0, sizeof(hash));
         sha3_256(input, (int)total_len, hash);
         free(input);
         
@@ -271,21 +273,23 @@ int cb_keccak_verify(const uint8_t *challenge, size_t challenge_len,
                     const uint8_t *solution, size_t solution_len) {
     if (!challenge || !solution) return -1;
     
-    // Compute Keccak-256 hash of challenge + solution
-    uint8_t hash[32];
+    // Combine challenge and solution into a single buffer
     size_t total_len = challenge_len + solution_len;
     uint8_t *input = (uint8_t*)malloc(total_len);
     if (!input) return -1;
     
     memcpy(input, challenge, challenge_len);
     memcpy(input + challenge_len, solution, solution_len);
+    
+    // Ensure hash buffer is zeroed before hashing
+    uint8_t hash[32];
+    memset(hash, 0, sizeof(hash));
     sha3_256(input, (int)total_len, hash);
     free(input);
     
-    // Check if hash meets difficulty (at least 1 leading zero bit)
+    // Use difficulty consistent with other verifiers (1 leading zero bit)
     uint32_t difficulty = 1;
-    int result = pow_verify_hash_difficulty(hash, 32, difficulty);
-    return result; // Returns 1 if valid, 0 if not
+    return pow_verify_hash_difficulty(hash, 32, difficulty);
 }
 
 /* SCRYPT */
@@ -311,10 +315,12 @@ int mb_scrypt_solve(const uint8_t *challenge, size_t challenge_len,
         uint8_t *input = (uint8_t*)malloc(total_len);
         if (!input) return -1;
         
+        int result;
+        
         memcpy(input, challenge, challenge_len);
         memcpy(input + challenge_len, nonce, nonce_len);
         
-        int result = scrypt(input, total_len, input, total_len, 1024, 8, 1, hash, 32);
+        result = scrypt(input, total_len, input, total_len, 1024, 8, 1, hash, 32);
         free(input);
         
         if (result != 0) continue;

@@ -9,7 +9,10 @@
 #ifdef __cplusplus
 #include <chrono>
 #endif
+// Only include ctime for C++
+#ifdef __cplusplus
 #include <ctime>
+#endif
 #include "../crypto/blake2.h"
 #include "../crypto/siphash.hpp"
 

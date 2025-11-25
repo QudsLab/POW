@@ -9,7 +9,7 @@ on:
     paths:
       - "src/**"
       - "Makefile"
-      - "build_*.sh"
+      - "builder.py"
       - "generate_manifest.py"
       - ".github/workflows/**"
   pull_request:
@@ -20,14 +20,18 @@ on:
 
 env:
   BUILD_VERSION: ${{ github.run_number }}
-  REPO: qudslab/pow
 
 jobs:
-  # ========== WINDOWS BUILDS (PARALLEL) ==========
-  build-windows-32:
+  # ========== WINDOWS BUILDS ==========
+  build-windows:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
 
       - name: Setup MSYS2
         uses: msys2/setup-msys2@v2
@@ -39,295 +43,166 @@ jobs:
             mingw-w64-ucrt-x86_64-make
             make
 
-      - name: Build Windows 32-bit
+      - name: Build Windows binaries
         shell: msys2 {0}
         run: |
-          rm -rf obj
-          CFLAGS="-w -O2 -std=c99 -fPIC -m32" CXXFLAGS="-w -O2 -std=c++11 -fPIC -m32" make all 2>/dev/null || echo "32-bit build attempted"
-          mkdir -p bin/windows/32
-          cp bin/*.dll bin/windows/32/ 2>/dev/null || echo "No DLLs found"
-          ls -lh bin/windows/32/
+          python builder.py all
 
-      - name: Upload Windows 32-bit
+      - name: Upload Windows binaries
         uses: actions/upload-artifact@v4
         with:
-          name: windows-32
-          path: bin/windows/32/
+          name: windows-binaries
+          path: bin/windows/
           retention-days: 1
 
-  build-windows-64:
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup MSYS2
-        uses: msys2/setup-msys2@v2
-        with:
-          msystem: UCRT64
-          update: true
-          install: >-
-            mingw-w64-ucrt-x86_64-gcc
-            mingw-w64-ucrt-x86_64-make
-            make
-
-      - name: Build Windows 64-bit
-        shell: msys2 {0}
-        run: |
-          rm -rf obj
-          make all
-          mkdir -p bin/windows/64
-          cp bin/*.dll bin/windows/64/ 2>/dev/null || echo "No DLLs found"
-          ls -lh bin/windows/64/
-
-      - name: Upload Windows 64-bit
-        uses: actions/upload-artifact@v4
-        with:
-          name: windows-64
-          path: bin/windows/64/
-          retention-days: 1
-
-  # ========== LINUX BUILDS (PARALLEL) ==========
-  build-linux-32:
+  # ========== LINUX BUILDS ==========
+  build-linux:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
 
       - name: Install Dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y build-essential gcc-multilib g++-multilib
 
-      - name: Build Linux 32-bit
+      - name: Build Linux binaries
         run: |
-          rm -rf obj
-          CFLAGS="-w -O2 -std=c99 -fPIC -m32" CXXFLAGS="-w -O2 -std=c++11 -fPIC -m32" make all 2>/dev/null || echo "32-bit build attempted"
-          mkdir -p bin/linux/32
-          cp bin/*.so bin/linux/32/ 2>/dev/null || echo "No .so files found"
-          ls -lh bin/linux/32/
+          python3 builder.py all
 
-      - name: Upload Linux 32-bit
+      - name: Upload Linux binaries
         uses: actions/upload-artifact@v4
         with:
-          name: linux-32
-          path: bin/linux/32/
-          retention-days: 1
-
-  build-linux-64:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Install Dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y build-essential
-
-      - name: Build Linux 64-bit
-        run: |
-          rm -rf obj
-          make all
-          mkdir -p bin/linux/64
-          cp bin/*.so bin/linux/64/ 2>/dev/null || echo "No .so files found"
-          ls -lh bin/linux/64/
-
-      - name: Upload Linux 64-bit
-        uses: actions/upload-artifact@v4
-        with:
-          name: linux-64
-          path: bin/linux/64/
+          name: linux-binaries
+          path: bin/linux/
           retention-days: 1
 
   # ========== MACOS BUILD ==========
-  build-macos-64:
+  build-macos:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Build macOS 64-bit
-        run: |
-          rm -rf obj
-          make all
-          mkdir -p bin/macos/64
-          cp bin/*.dylib bin/macos/64/ 2>/dev/null || echo "No .dylib files found"
-          ls -lh bin/macos/64/
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
 
-      - name: Upload macOS 64-bit
+      - name: Build macOS binaries
+        run: |
+          python3 builder.py all
+
+      - name: Upload macOS binaries
         uses: actions/upload-artifact@v4
         with:
-          name: macos-64
-          path: bin/macos/64/
+          name: macos-binaries
+          path: bin/macos/
           retention-days: 1
 
-  # ========== ANDROID BUILDS (PARALLEL) ==========
-  build-android-32:
+  # ========== ANDROID BUILDS ==========
+  build-android:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
 
       - name: Setup Android NDK
         uses: nttld/setup-ndk@v1
         with:
           ndk-version: r26b
 
-      - name: Build Android 32-bit
+      - name: Build Android binaries
         run: |
-          rm -rf obj
-          CFLAGS="-w -O2 -std=c99 -fPIC -m32" CXXFLAGS="-w -O2 -std=c++11 -fPIC -m32" make all 2>/dev/null || echo "32-bit build attempted"
-          mkdir -p bin/android/32
-          cp bin/*.so bin/android/32/ 2>/dev/null || echo "No .so files found"
-          ls -lh bin/android/32/
+          python3 builder.py android-32
+          python3 builder.py android-64
 
-      - name: Upload Android 32-bit
+      - name: Upload Android binaries
         uses: actions/upload-artifact@v4
         with:
-          name: android-32
-          path: bin/android/32/
+          name: android-binaries
+          path: bin/android/
           retention-days: 1
 
-  build-android-64:
+  # ========== WASM BUILDS ==========
+  build-wasm:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Android NDK
-        uses: nttld/setup-ndk@v1
+      - name: Setup Python
+        uses: actions/setup-python@v4
         with:
-          ndk-version: r26b
-
-      - name: Build Android 64-bit
-        run: |
-          rm -rf obj
-          make all
-          mkdir -p bin/android/64
-          cp bin/*.so bin/android/64/ 2>/dev/null || echo "No .so files found"
-          ls -lh bin/android/64/
-
-      - name: Upload Android 64-bit
-        uses: actions/upload-artifact@v4
-        with:
-          name: android-64
-          path: bin/android/64/
-          retention-days: 1
-
-  # ========== WASM BUILDS (PARALLEL) ==========
-  build-wasm-32:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
+          python-version: "3.11"
 
       - name: Setup Emscripten
         uses: mymindstorm/setup-emsdk@v14
         with:
           version: latest
 
-      - name: Build WASM 32-bit
+      - name: Build WASM binaries
         run: |
-          rm -rf obj bin
-          mkdir -p bin/wasm/32
+          python3 builder.py wasm-32
+          python3 builder.py wasm-64
 
-          # Emscripten flags for pthread and shared library support
-          export EMCC_FLAGS="-s USE_PTHREADS=1 -s PTHREAD_POOL_SIZE=4 -s SIDE_MODULE=1 -s EXPORT_ALL=1 -s WASM=1"
-
-          # Try to build with Emscripten
-          CC=emcc CXX=em++ \
-            CFLAGS="-w -O2 -std=c99 -fPIC $EMCC_FLAGS" \
-            CXXFLAGS="-w -O2 -std=c++11 -fPIC $EMCC_FLAGS" \
-            LDFLAGS="$EMCC_FLAGS" \
-            make all 2>&1 | tee build.log || true
-
-          # Check if any WASM files were created
-          if ls bin/*.wasm 1>/dev/null 2>&1; then
-            cp bin/*.wasm bin/wasm/32/
-            cp bin/*.js bin/wasm/32/ 2>/dev/null || true
-            echo "✅ WASM 32-bit build successful"
-            ls -lh bin/wasm/32/
-          else
-            echo "⚠️ WASM 32-bit build produced no files"
-            echo "Build log:"
-            cat build.log || true
-            # Create placeholder to avoid artifact error
-            touch bin/wasm/32/.gitkeep
-          fi
-
-      - name: Upload WASM 32-bit
+      - name: Upload WASM binaries
         uses: actions/upload-artifact@v4
         with:
-          name: wasm-32
-          path: bin/wasm/32/
-          retention-days: 1
-          if-no-files-found: ignore
-
-  build-wasm-64:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Emscripten
-        uses: mymindstorm/setup-emsdk@v14
-        with:
-          version: latest
-
-      - name: Build WASM 64-bit
-        run: |
-          rm -rf obj bin
-          mkdir -p bin/wasm/64
-
-          # Emscripten flags for pthread and shared library support (64-bit memory)
-          export EMCC_FLAGS="-s USE_PTHREADS=1 -s PTHREAD_POOL_SIZE=4 -s SIDE_MODULE=1 -s EXPORT_ALL=1 -s WASM=1 -s MEMORY64=1"
-
-          # Try to build with Emscripten
-          CC=emcc CXX=em++ \
-            CFLAGS="-w -O2 -std=c99 -fPIC $EMCC_FLAGS" \
-            CXXFLAGS="-w -O2 -std=c++11 -fPIC $EMCC_FLAGS" \
-            LDFLAGS="$EMCC_FLAGS" \
-            make all 2>&1 | tee build.log || true
-
-          # Check if any WASM files were created
-          if ls bin/*.wasm 1>/dev/null 2>&1; then
-            cp bin/*.wasm bin/wasm/64/
-            cp bin/*.js bin/wasm/64/ 2>/dev/null || true
-            echo "✅ WASM 64-bit build successful"
-            ls -lh bin/wasm/64/
-          else
-            echo "⚠️ WASM 64-bit build produced no files"
-            echo "Build log:"
-            cat build.log || true
-            # Create placeholder to avoid artifact error
-            touch bin/wasm/64/.gitkeep
-          fi
-
-      - name: Upload WASM 64-bit
-        uses: actions/upload-artifact@v4
-        with:
-          name: wasm-64
-          path: bin/wasm/64/
+          name: wasm-binaries
+          path: bin/wasm/
           retention-days: 1
           if-no-files-found: ignore
 
   # ========== COMMIT ALL BINARIES ==========
-  commit-all-binaries:
+  commit-binaries:
     runs-on: ubuntu-latest
-    needs:
-      [
-        build-windows-32,
-        build-windows-64,
-        build-linux-32,
-        build-linux-64,
-        build-macos-64,
-        build-android-32,
-        build-android-64,
-        build-wasm-32,
-        build-wasm-64,
-      ]
+    needs: [build-windows, build-linux, build-macos, build-android, build-wasm]
     steps:
       - uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
       - name: Download All Artifacts
         uses: actions/download-artifact@v4
         with:
           path: artifacts
+
+      - name: Organize Binaries
+        run: |
+          echo "=== Downloaded artifacts ==="
+          ls -laR artifacts/
+
+          echo ""
+          echo "=== Organizing binaries ==="
+          mkdir -p bin
+
+          # Copy all artifacts to bin/
+          for artifact_dir in artifacts/*; do
+            if [ -d "$artifact_dir" ]; then
+              echo "Processing $(basename $artifact_dir)"
+              cp -rv "$artifact_dir"/* bin/ 2>/dev/null || true
+            fi
+          done
+
+          echo ""
+          echo "=== Final bin structure ==="
+          find bin -type f -ls 2>/dev/null || echo "No binaries found"
+
+      - name: Generate versions.json
+        run: |
           echo "=== Generating versions.json ==="
           python3 generate_manifest.py bin bin/versions.json || echo "Warning: versions.json generation failed"
           cp BINARY_INFO.md bin/BINARY_INFO.md || true
@@ -353,24 +228,23 @@ jobs:
             
             git commit -m "Build v${{ env.BUILD_VERSION }}: Update $binary_count binaries [skip ci]"
             
-            # Pull latest changes with merge strategy first (PQChub pattern)
+            # Pull and push with retry
             git pull --no-rebase origin main || git pull --rebase origin main || true
             
-            # Push with retry logic (PQChub pattern)
             max_retries=3
             retry_count=0
             while [ $retry_count -lt $max_retries ]; do
               if git push origin main; then
-                echo "✅ Binaries committed and pushed successfully!"
+                echo "✅ Binaries committed successfully!"
                 break
               else
                 retry_count=$((retry_count + 1))
                 if [ $retry_count -lt $max_retries ]; then
-                  echo "Push failed, retrying ($retry_count/$max_retries)..."
+                  echo "Retrying ($retry_count/$max_retries)..."
                   git pull --rebase origin main
                   sleep 2
                 else
-                  echo "❌ Failed to push after $max_retries attempts"
+                  echo "❌ Failed after $max_retries attempts"
                   exit 1
                 fi
               fi

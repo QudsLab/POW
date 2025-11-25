@@ -5,7 +5,10 @@
 #include <string.h> // for functions strlen, memset
 #include <stdarg.h>
 #include <stdio.h>
+// Only include chrono for C++
+#ifdef __cplusplus
 #include <chrono>
+#endif
 #include <ctime>
 #include "../crypto/blake2.h"
 #include "../crypto/siphash.hpp"

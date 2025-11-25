@@ -15,12 +15,6 @@ const char *pow_type_name(pow_type_e pow_type) {
         case POW_SCRYPT:    return "scrypt";
         case POW_ARGON2:    return "argon2";
         case POW_ZHASH:     return "zhash";
-        case POW_CUCKOO:    return "cuckoo";
-        case POW_CUCKAROO:  return "cuckaroo";
-        case POW_CUCKAROOD: return "cuckarood";
-        case POW_CUCKAROOM: return "cuckaroom";
-        case POW_CUCKAROOZ: return "cuckarooz";
-        case POW_CUCKATOO:  return "cuckatoo";
         default:            return NULL;
     }
 }
@@ -34,12 +28,6 @@ pow_type_e pow_type_from_name(const char *name) {
     if (strcmp(name, "scrypt") == 0)    return POW_SCRYPT;
     if (strcmp(name, "argon2") == 0)    return POW_ARGON2;
     if (strcmp(name, "zhash") == 0)     return POW_ZHASH;
-    if (strcmp(name, "cuckoo") == 0)    return POW_CUCKOO;
-    if (strcmp(name, "cuckaroo") == 0)  return POW_CUCKAROO;
-    if (strcmp(name, "cuckarood") == 0) return POW_CUCKAROOD;
-    if (strcmp(name, "cuckaroom") == 0) return POW_CUCKAROOM;
-    if (strcmp(name, "cuckarooz") == 0) return POW_CUCKAROOZ;
-    if (strcmp(name, "cuckatoo") == 0)  return POW_CUCKATOO;
     
     return POW_INVALID;
 }
@@ -496,85 +484,3 @@ int hb_zhash_verify(const uint8_t *challenge, size_t challenge_len,
     return result; // Returns 1 if valid, 0 if not
 }
 
-/* CUCKOO */
-// Real Cuckoo PoW: use graph-based solver/verify
-#include "pb_cuckoo/cuckoo.h"
-
-int pb_cuckoo_solve(const uint8_t *challenge, size_t challenge_len,
-                   uint8_t *out_solution, size_t *out_solution_len) {
-    // TODO: implement real Cuckoo solver
-    if (out_solution_len) *out_solution_len = 128;
-    memset(out_solution, 0, 128);
-    return 0;
-}
-
-int pb_cuckoo_verify(const uint8_t *challenge, size_t challenge_len,
-                    const uint8_t *solution, size_t solution_len) {
-    // TODO: implement real Cuckoo verify
-    return 1;
-}
-
-/* CUCKAROO */
-int pb_cuckaroo_solve(const uint8_t *challenge, size_t challenge_len,
-                     uint8_t *out_solution, size_t *out_solution_len) {
-    if (out_solution_len) *out_solution_len = 128;
-    return 0;
-}
-
-int pb_cuckaroo_verify(const uint8_t *challenge, size_t challenge_len,
-                      const uint8_t *solution, size_t solution_len) {
-    // Stub: return success for now
-    return 1;
-}
-
-/* CUCKAROOD */
-int pb_cuckarood_solve(const uint8_t *challenge, size_t challenge_len,
-                      uint8_t *out_solution, size_t *out_solution_len) {
-    if (out_solution_len) *out_solution_len = 128;
-    return 0;
-}
-
-int pb_cuckarood_verify(const uint8_t *challenge, size_t challenge_len,
-                       const uint8_t *solution, size_t solution_len) {
-    // Stub: return success for now
-    return 1;
-}
-
-/* CUCKAROOM */
-int pb_cuckaroom_solve(const uint8_t *challenge, size_t challenge_len,
-                      uint8_t *out_solution, size_t *out_solution_len) {
-    if (out_solution_len) *out_solution_len = 128;
-    return 0;
-}
-
-int pb_cuckaroom_verify(const uint8_t *challenge, size_t challenge_len,
-                       const uint8_t *solution, size_t solution_len) {
-    // Stub: return success for now
-    return 1;
-}
-
-/* CUCKAROOZ */
-int pb_cuckarooz_solve(const uint8_t *challenge, size_t challenge_len,
-                      uint8_t *out_solution, size_t *out_solution_len) {
-    if (out_solution_len) *out_solution_len = 128;
-    return 0;
-}
-
-int pb_cuckarooz_verify(const uint8_t *challenge, size_t challenge_len,
-                       const uint8_t *solution, size_t solution_len) {
-    // Stub: return success for now
-    return 1;
-}
-
-/* CUCKATOO */
-int pb_cuckatoo_solve(const uint8_t *challenge, size_t challenge_len,
-                     uint8_t *out_solution, size_t *out_solution_len) {
-    if (out_solution_len) *out_solution_len = 128;
-    return 0;
-}
-
-int pb_cuckatoo_verify(const uint8_t *challenge, size_t challenge_len,
-                      const uint8_t *solution, size_t solution_len) {
-    // Stub: return success for now
-    return 1;
-}

@@ -4,21 +4,40 @@
 
 ```
 bin/
-├── versions.json              # Manifest with checksums and download links
-├── windows/
-│   ├── 32/                    # 32-bit Windows DLLs
-│   └── 64/                    # 64-bit Windows DLLs
-├── linux/
-│   ├── 32/                    # 32-bit Linux libraries
-│   └── 64/                    # 64-bit Linux libraries
-├── macos/
-│   └── 64/                    # macOS libraries (universal)
-├── wasm/
-│   ├── 32/                    # 32-bit WebAssembly modules
-│   └── 64/                    # 64-bit WebAssembly modules
-└── android/
-    ├── 32/                    # 32-bit Android libraries
-    └── 64/                    # 64-bit Android libraries
+├── windows/                
+│   ├── 32/                 # 32-bit Windows DLLs
+│   │   ├── server.dll      # Server DLL for 32-bit Windows
+│   │   └── client.dll      # Client DLL for 32-bit Windows
+│   │
+│   └── 64/                 # 64-bit Windows DLLs
+│       ├── server.dll      # Server DLL for 64-bit Windows
+│       └── client.dll      # Client DLL for 64-bit Windows
+│
+├── linux/                  
+│   ├── 32/                 # 32-bit Linux libraries
+│   │   ├── server.so       # Server library for 32-bit Linux
+│   │   └── client.so       # Client library for 32-bit Linux
+│   │
+│   └── 64/                 # 64-bit Linux libraries
+│       ├── server.so       # Server library for 64-bit Linux
+│       └── client.so       # Client library for 64-bit Linux
+│
+├── macos/                  
+│   └── 64/                 # 64-bit macOS libraries
+│       ├── server.dylib    # Server library for 64-bit macOS
+│       └── client.dylib    # Client library for 64-bit macOS
+│
+├── android/                
+│   ├── 32/                 # 32-bit Android libraries
+│   │   ├── server.so       # Server library for 32-bit Android
+│   │   └── client.so       # Client library for 32-bit Android
+│   │
+│   └── 64/                 # 64-bit Android libraries
+│       ├── server.so       # Server library for 64-bit Android
+│       └── client.so       # Client library for 64-bit Android
+│
+├── versions.json           # Contains metadata for each binary
+└── BINARY_INFO.md          # This file
 ```
 
 ## How We Handle Binaries
@@ -45,7 +64,6 @@ Sequential build process ensures consistency:
 - Windows: `.dll`
 - Linux: `.so`
 - macOS: `.dylib`
-- WebAssembly: `.wasm`, `.js`
 - Android: `.so`
 
 ## Manifest (versions.json)
@@ -58,7 +76,6 @@ Contains for each binary:
 ## Use Cases
 
 - **Desktop Apps**: Use Windows/macOS/Linux binaries
-- **Web Apps**: Use WebAssembly modules
 - **Mobile Apps**: Use Android libraries
 - **Servers**: Use Linux 64-bit for performance
 - **Embedded**: Use Linux 32-bit for resource-constrained devices

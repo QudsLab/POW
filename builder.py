@@ -60,7 +60,7 @@ class POWBuilder:
         for file in bin_root.glob(pattern):
             if file.is_file() and file.parent == bin_root:
                 shutil.copy2(file, dest_path)
-                print(f"  → {file.name} → {dest_dir}/")
+                print(f"  -> {file.name} -> {dest_dir}/")
                 copied += 1
         
         return copied

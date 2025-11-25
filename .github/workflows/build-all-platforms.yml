@@ -342,20 +342,38 @@ jobs:
           mkdir -p bin/android/32 bin/android/64
           mkdir -p bin/wasm/32 bin/wasm/64
 
-          # Copy artifacts to bin directory (skip .gitkeep files)
-          find artifacts/windows-32 -type f ! -name '.gitkeep' -exec cp {} bin/windows/32/ \; 2>/dev/null || echo "⚠️ No Windows 32-bit"
-          find artifacts/windows-64 -type f ! -name '.gitkeep' -exec cp {} bin/windows/64/ \; 2>/dev/null || echo "⚠️ No Windows 64-bit"
-          find artifacts/linux-32 -type f ! -name '.gitkeep' -exec cp {} bin/linux/32/ \; 2>/dev/null || echo "⚠️ No Linux 32-bit"
-          find artifacts/linux-64 -type f ! -name '.gitkeep' -exec cp {} bin/linux/64/ \; 2>/dev/null || echo "⚠️ No Linux 64-bit"
-          find artifacts/macos-64 -type f ! -name '.gitkeep' -exec cp {} bin/macos/64/ \; 2>/dev/null || echo "⚠️ No macOS 64-bit"
-          find artifacts/android-32 -type f ! -name '.gitkeep' -exec cp {} bin/android/32/ \; 2>/dev/null || echo "⚠️ No Android 32-bit"
-          find artifacts/android-64 -type f ! -name '.gitkeep' -exec cp {} bin/android/64/ \; 2>/dev/null || echo "⚠️ No Android 64-bit"
-          find artifacts/wasm-32 -type f ! -name '.gitkeep' -exec cp {} bin/wasm/32/ \; 2>/dev/null || echo "⚠️ No WASM 32-bit"
-          find artifacts/wasm-64 -type f ! -name '.gitkeep' -exec cp {} bin/wasm/64/ \; 2>/dev/null || echo "⚠️ No WASM 64-bit"
+          # Copy artifacts to bin directory
+          if [ -d "artifacts/windows-32" ]; then
+            cp -r artifacts/windows-32/* bin/windows/32/ 2>/dev/null && echo "✅ Copied Windows 32-bit" || echo "⚠️ No Windows 32-bit"
+          fi
+          if [ -d "artifacts/windows-64" ]; then
+            cp -r artifacts/windows-64/* bin/windows/64/ 2>/dev/null && echo "✅ Copied Windows 64-bit" || echo "⚠️ No Windows 64-bit"
+          fi
+          if [ -d "artifacts/linux-32" ]; then
+            cp -r artifacts/linux-32/* bin/linux/32/ 2>/dev/null && echo "✅ Copied Linux 32-bit" || echo "⚠️ No Linux 32-bit"
+          fi
+          if [ -d "artifacts/linux-64" ]; then
+            cp -r artifacts/linux-64/* bin/linux/64/ 2>/dev/null && echo "✅ Copied Linux 64-bit" || echo "⚠️ No Linux 64-bit"
+          fi
+          if [ -d "artifacts/macos-64" ]; then
+            cp -r artifacts/macos-64/* bin/macos/64/ 2>/dev/null && echo "✅ Copied macOS 64-bit" || echo "⚠️ No macOS 64-bit"
+          fi
+          if [ -d "artifacts/android-32" ]; then
+            cp -r artifacts/android-32/* bin/android/32/ 2>/dev/null && echo "✅ Copied Android 32-bit" || echo "⚠️ No Android 32-bit"
+          fi
+          if [ -d "artifacts/android-64" ]; then
+            cp -r artifacts/android-64/* bin/android/64/ 2>/dev/null && echo "✅ Copied Android 64-bit" || echo "⚠️ No Android 64-bit"
+          fi
+          if [ -d "artifacts/wasm-32" ]; then
+            cp -r artifacts/wasm-32/* bin/wasm/32/ 2>/dev/null && echo "✅ Copied WASM 32-bit" || echo "⚠️ No WASM 32-bit"
+          fi
+          if [ -d "artifacts/wasm-64" ]; then
+            cp -r artifacts/wasm-64/* bin/wasm/64/ 2>/dev/null && echo "✅ Copied WASM 64-bit" || echo "⚠️ No WASM 64-bit"
+          fi
 
           echo ""
           echo "=== Final bin structure ==="
-          find bin -type f ! -name '.gitkeep' -ls || echo "No binaries found"
+          find bin -type f -ls 2>/dev/null || echo "No binaries found"
 
       - name: Generate versions.json
         run: |

@@ -46,7 +46,7 @@ jobs:
       - name: Build Windows binaries
         shell: msys2 {0}
         run: |
-          python builder.py all
+          python3 builder.py all
 
       - name: Upload Windows binaries
         uses: actions/upload-artifact@v4

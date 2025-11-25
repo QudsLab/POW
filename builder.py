@@ -195,13 +195,17 @@ class POWBuilder:
         if self.run_make(env, capture_output=True):
             copied_wasm = self.copy_binaries("*.wasm", "wasm/32")
             copied_js = self.copy_binaries("*.js", "wasm/32")
-            print(f"✓ WASM 32-bit: {copied_wasm} wasm, {copied_js} js files")
-            return copied_wasm > 0
+            if copied_wasm > 0:
+                print(f"✓ WASM 32-bit: {copied_wasm} wasm, {copied_js} js files")
+            else:
+                print("⚠ WASM 32-bit: Build succeeded but no files (pthread not supported)")
         else:
-            print("⚠ WASM 32-bit build failed (pthread not fully supported)")
-            # Create placeholder
-            (self.bin_dir / "wasm/32").mkdir(parents=True, exist_ok=True)
-            return False
+            print("⚠ WASM 32-bit: Build failed (pthread not fully supported)")
+        
+        # Create placeholder directory
+        (self.bin_dir / "wasm/32").mkdir(parents=True, exist_ok=True)
+        # Don't fail - WASM is experimental
+        return True
     
     def build_wasm_64(self):
         """Build WebAssembly 64-bit binaries"""
@@ -227,13 +231,17 @@ class POWBuilder:
         if self.run_make(env, capture_output=True):
             copied_wasm = self.copy_binaries("*.wasm", "wasm/64")
             copied_js = self.copy_binaries("*.js", "wasm/64")
-            print(f"✓ WASM 64-bit: {copied_wasm} wasm, {copied_js} js files")
-            return copied_wasm > 0
+            if copied_wasm > 0:
+                print(f"✓ WASM 64-bit: {copied_wasm} wasm, {copied_js} js files")
+            else:
+                print("⚠ WASM 64-bit: Build succeeded but no files (pthread not supported)")
         else:
-            print("⚠ WASM 64-bit build failed (pthread not fully supported)")
-            # Create placeholder
-            (self.bin_dir / "wasm/64").mkdir(parents=True, exist_ok=True)
-            return False
+            print("⚠ WASM 64-bit: Build failed (pthread not fully supported)")
+        
+        # Create placeholder directory
+        (self.bin_dir / "wasm/64").mkdir(parents=True, exist_ok=True)
+        # Don't fail - WASM is experimental
+        return True
     
     def build_all(self):
         """Build all supported platforms"""
